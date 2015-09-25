@@ -1,0 +1,129 @@
+include:"pipeline.conf"
+
+# The ultimate output files we want to get
+rule all:
+     input: DERNA + ".htseq.count.table.txt,expand(MAPRNA + "/{sample}." + LIMIT +".sort.bam.bai", sample=SAMPLE)
+
+
+
+#Create  STAR Reference
+rule create_STAR_reference
+  input: fasta = "{FASTA}", gtf = "{REFERENCE_DIR}/annotaion/{REFERENCE_GTF}, readLength = READLENGTH
+  output: "{STAR_REF}"
+  threads = 8
+  shell: ""
+
+# Map
+rule map_reads_:
+     input: forward = READS_DIR + "/{sample}{FORWARD}", reverse = READS_DIR + "/{sample}{REVERSE}", reference = {STAR_REF}
+     output: samFile = MAPPEDREADS + "/{sample}/Aligned.out.sam.sam", LogFile = MAPPEDREADS + "/{sample}/Log.final.out"
+     threads: 8
+     shell: "STAR --genomeDir {input.reference} --readFilesIn input.forward input.reverse --runThreadN 8 --readFilesCommand zcat "
+
+
+
+rule samtools_sam2bam_hairpin:
+     input: MAPRNA + "/{sample}.sam"
+     output: MAPRNA + "/{sample}.bam"
+     shell: "samtools view -h -bS {input} -o {output}"
+
+# Sort the BAM files
+rule samtools_sort_hairpin:
+     input: MAPRNA + "/{sample}.bam"
+     output: MAPRNA + "/{sample}.sort.bam"
+     shell: "samtools sort {input} {MAPRNA}/{wildcards.sample}.sort"
+
+
+# Index the sorted BAM files
+
+rule samtools_index_hairpin:
+     input: MAPRNA + "/{sample}.sort.bam"
+     output: MAPRNA + "/{sample}.sort.bam.bai"
+     shell: "samtools index {input}"
+
+rule softLink_BamFiles:
+     input: MAPPEDREADS + "/{sample}/Aligned.out.sort.bam"
+     output: STAR_BAMFILES + "/{sample}.sort.bam"
+     shell: "ln -s {input} {output}"
+
+
+rule softLink_BamIndexFiles:
+     input: MAPPEDREADS + "/{sample}/Aligned.out.sort.bam.bai"
+     output: STAR_BAMFILES + "/{sample}.sort.bam.bai"
+     shell: "ln -s {input} {output}"
+
+rule move_LogFiles:
+     input: MAPPEDREADS + "/{sample}/Log.final.out"
+     output: STAR_BAMFILES + "/logFiles/{sample}.Log.final.out"
+     shell: "ln -s {input} {output}"
+
+# Estimate counts
+
+# count reads for each miRNA  and merge them
+rule count_reads_per_gene:
+     input: bam = STAR_BAMFILES + "/{sample}.sort.bam", gff = GTF
+     output: GENE_COUNT + "/{sample}.Stranded.htseq-count.sort.txt"
+     shell: "htseq-count  -t miRNA -i Name -a 0 -f bam -r pos -s yes {input.bam} {input.gff} > {output}"
+
+
+
+rule merge_reads_per_gene_into_one_file:
+     input:  expand(GENE_COUNT + "/{sample}.Stranded.htseq-count.sort.txt", sample=SAMPLE)
+     output: GENE_COUNT + "/All.Stranded.htseq.count.table.txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {DERNA} -suffix .Name_Stranded.htseq-count.sort.txt -o {output}"
+
+
+
+# count reads for all  miRNAs on each premiRNA  and merge them
+
+rule count_all_miRNA_reads_per_premiRNA:
+     input: bam = MAPRNA + "/{sample}." + LIMIT +".sort.bam", gff = ANNORNA
+     output: DERNA + "/{sample}." + LIMIT +".htseq_id_Stranded.htseq-count.sort.txt"
+     shell: "samtools view {input.bam}  |  awk -f /proj/b2014162/nobackup/private/scripts/fixSAMforHTseq.awk  | htseq-count  -t miRNA -i htseq_id -a 0 -f sam -r pos -s yes - {input.gff} > {output}"
+
+
+
+rule merge_all_miRNA_reads_per_premiRNA:
+     input:  expand(DERNA + "/{sample}." + LIMIT +".htseq_id_Stranded.htseq-count.sort.txt", sample=SAMPLE)
+     output: DERNA + "/htseq_id_Stranded" + LIMIT +".htseq.count.table.txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {DERNA} -suffix .htseq_id_Stranded.htseq-count.sort.txt -o {output}"
+
+
+# count reads for each pre-miRNA correct strand  and merge them
+
+rule count_all_reads_per_premiRNA:
+     input: bam = MAPRNA + "/{sample}." + LIMIT +".sort.bam", gff = ANNORNA
+     output: DERNA + "/{sample}." + LIMIT +".premiRNA_Stranded.htseq-count.sort.txt"
+     shell: "samtools view {input.bam}  |  awk -f /proj/b2014162/nobackup/private/scripts/fixSAMforHTseq.awk  | htseq-count  -t miRNA_primary_transcript -i Name  -a 0 -f sam -r pos -s yes - {input.gff} > {output}"
+
+
+
+rule merge_all_reads_per_premiRNA:
+     input:  expand(DERNA + "/{sample}." + LIMIT +".premiRNA_Stranded.htseq-count.sort.txt", sample=SAMPLE)
+     output: DERNA + "/premiRNA_Stranded" + LIMIT +".htseq.count.table.txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {DERNA} -suffix .premiRNA_Stranded.htseq-count.sort.txt -o {output}"
+
+
+# count reads for each pre-miRNA both strands  and merge them
+
+rule count_all_reads_per_premiRNA_both_strands:
+     input: bam = MAPRNA + "/{sample}." + LIMIT +".sort.bam", gff = ANNORNA
+     output: DERNA + "/{sample}." + LIMIT +".premiRNA_Unstranded.htseq-count.sort.txt"
+     shell: "samtools view {input.bam}  |  awk -f /proj/b2014162/nobackup/private/scripts/fixSAMforHTseq.awk  | htseq-count  -t miRNA_primary_transcript -i Name  -a 0 -f sam -r pos -s no - {input.gff} > {output}"
+
+
+
+rule merge_all_reads_per_premiRNA_both_strands:
+     input:  expand(DERNA + "/{sample}." + LIMIT +".premiRNA_Unstranded.htseq-count.sort.txt", sample=SAMPLE)
+     output: DERNA + "/premiRNA_Unstranded" + LIMIT +".htseq.count.table.txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {DERNA} -suffix .premiRNA_Unstranded.htseq-count.sort.txt -o {output}"
+
+
+rule analyze_read_Pattern:
+     input:  DERNA + "/Name_Stranded" + LIMIT +".htseq.count.table.txt", DERNA + "/premiRNA_Unstranded" + LIMIT +".htseq.count.table.txt", DERNA + "/premiRNA_Stranded" + LIMIT +".htseq.count.table.txt",DERNA + "/htseq_id_Stranded" + LIMIT +".htseq.count.table.txt"
+     output: "miRNA_distribution_Analysis" + LIMIT +".txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {DERNA} -suffix .premiRNA_Unstranded.htseq-count.sort.txt -o {output}"
+
+
+
+

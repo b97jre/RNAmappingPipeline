@@ -1,0 +1,10 @@
+Package: GBPanalysis
+Type: Package
+Title: GBP sequence data throughput
+Version: 0.1
+Date: 2015-09-08
+Author: GBP team
+Maintainer: Who to complain to <johan.reimegard@scilifelab.se>
+Description: Different code to analyse and visualize expression data to help understand the underlying mechansism
+License: Free
+LazyData: TRUE
