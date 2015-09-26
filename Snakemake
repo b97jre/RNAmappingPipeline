@@ -10,8 +10,8 @@ rule all:
 rule create_STAR_reference:
   input: fasta = "{FASTA}", gtf = "{REFERENCE_DIR}/annotaion/{REFERENCE_GTF}, readLength = READLENGTH
   output: "{STAR_REF}"
-  threads = 8
-  shell: ""
+  threads : 8
+  shell: "testing"
 
 
 # Map
