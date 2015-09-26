@@ -8,7 +8,7 @@ rule all:
 
 #Create  STAR Reference
 rule create_STAR_reference:
-  input: fasta = "{FASTA}", gtf = "{REFERENCE_DIR}/annotaion/{REFERENCE_GTF}, readLength = READLENGTH
+  input: fasta = "{FASTA}", gtf = "{REFERENCE_DIR}/annotaion/{REFERENCE_GTF}"
   output: "{STAR_REF}"
   threads : 8
   shell: "testing"
