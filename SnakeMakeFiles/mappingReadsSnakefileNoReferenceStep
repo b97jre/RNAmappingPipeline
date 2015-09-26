@@ -1,0 +1,75 @@
+include:"pipeline.conf"
+
+# The ultimate output files we want to get
+rule all:
+     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample=SAMPLE, suffix = SUFFIX)
+
+# Run FASTQC on samples;
+rule run_fastQC:
+  input: MAIN_DIR + "reads/{sample}.{suffix}"
+  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
+  shell: "fastqc {input}"
+
+
+
+
+
+# Map
+rule map_reads:
+     input: forward = MAIN_DIR + "reads/{sample}.1.fastq.gz", reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", reference = MAIN_DIR +"reference/STARreference"
+     output: temp(samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam"), LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out"
+     threads: 8
+     shell: "STAR --genomeDir {input.reference} --readFilesIn input.forward input.reverse --runThreadN 8 --readFilesCommand zcat "
+
+rule softLink_SamFiles:
+     input: MAIN_DIR + "mapping/{SAMPLES}/Aligned.out.sam"
+     output: temp(MAIN_DIR + "mapping/{SAMPLES}.sam")
+     shell: "ln -s {input} {output}"
+
+rule samtools_sam2bam_hairpin:
+     input: MAIN_DIR + "mapping/{sample}.sam"
+     output: temp(MAIN_DIR + "mapping/{sample}.bam")
+     shell: "samtools view -h -bS {input} -o {output}"
+
+# Sort the BAM files
+rule samtools_sort_hairpin:
+     input: MAIN_DIR + "mapping/{sample}.bam"
+     output: MAIN_DIR + "mapping/{sample}.sort.bam"
+     shell: "samtools sort {input} {MAIN_DIR}/mapping/{wildcards.sample}.sort"
+
+
+# Index the sorted BAM files
+
+rule samtools_index_hairpin:
+     input: MAIN_DIR + "mapping/{sample}.sort.bam"
+     output: MAIN_DIR + "mapping/{sample}.sort.bam.bai"
+     shell: "samtools index {input}"
+
+
+
+rule link_LogFiles:
+     input: MAIN_DIR + "mapping/{sample}/Log.final.out"
+     output: MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out"
+     shell: "ln -s {input} {output}"
+
+# Estimate counts
+
+# count reads for each miRNA  and merge them
+rule count_reads_per_gene:
+     input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+     output: MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt"
+     shell: "htseq-count  -t miRNA -i Name -a 0 -f bam -r pos -s yes {input.bam} {input.gff} > {output}"
+
+
+
+rule merge_reads_per_gene_into_one_file:
+     input:  expand(MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt", sample=SAMPLE)
+     output: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt"
+     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output}"
+
+
+
+
+
+
+
