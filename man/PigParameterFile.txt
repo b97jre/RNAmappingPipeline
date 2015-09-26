@@ -9,3 +9,5 @@ ReferenceGTF	/proj/b2015262/private/references/pig/annotations/Sus_scrofa.Sscrof
 ReferenceSTAR	/proj/b2015262/private/references/pig/STARreference
 #SnakemakeInfo
 snakemakeFile	/proj/b2015262/private/scripts/GBP_scripts/Snakemake
+# Meta data info
+metaDataFile /proj/b2015262/private/references/pig/metaData/ PigSampleMetaData.20090926.tab.table.txt Metadata table that is taken from https://wabi-wiki.scilifelab.se/display/NWIER/Meta+data+for+the+samples
