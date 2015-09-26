@@ -1,0 +1,11 @@
+Key	Value	Comment
+#Reads info
+ReadsSuffix	.fastq.gz	End of reads file in below reads directory
+readsTable	/proj/b2015262/private/reads/Project_Pig_GBPfileNames.table.txt	Table with reads info
+#ReferenceInfo
+ReferenceFasta	/proj/b2015262/private/references/pig/fastaSequences/Sus_scrofa.Sscrofa10.2.dna_sm.toplevel.fa	Reference file
+ReferenceSuffix	.fa	End of reference file (most likely .fa or .fasta)
+ReferenceGTF	/proj/b2015262/private/references/pig/annotations/Sus_scrofa.Sscrofa10.2.81.gtf
+ReferenceSTAR	/proj/b2015262/private/references/pig/STARreference
+#SnakemakeInfo
+snakemakeFile	/proj/b2015262/private/scripts/GBP_scripts
