@@ -8,4 +8,4 @@ ReferenceSuffix	.fa	End of reference file (most likely .fa or .fasta)
 ReferenceGTF	/proj/b2015262/private/references/pig/annotations/Sus_scrofa.Sscrofa10.2.81.gtf
 ReferenceSTAR	/proj/b2015262/private/references/pig/STARreference
 #SnakemakeInfo
-snakemakeFile	/proj/b2015262/private/scripts/GBP_scripts
+snakemakeFile	/proj/b2015262/private/scripts/GBP_scripts/Snakemake
