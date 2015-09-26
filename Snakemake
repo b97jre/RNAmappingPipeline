@@ -2,19 +2,20 @@ include:"pipeline.conf"
 
 # The ultimate output files we want to get
 rule all:
-     input: DERNA + ".htseq.count.table.txt,expand(MAPRNA + "/{sample}." + LIMIT +".sort.bam.bai", sample=SAMPLE)
+     input: expand(MAPRNA + "/{sample}." + LIMIT +".sort.bam.bai", sample=SAMPLE)
 
 
 
 #Create  STAR Reference
-rule create_STAR_reference
+rule create_STAR_reference:
   input: fasta = "{FASTA}", gtf = "{REFERENCE_DIR}/annotaion/{REFERENCE_GTF}, readLength = READLENGTH
   output: "{STAR_REF}"
   threads = 8
   shell: ""
 
+
 # Map
-rule map_reads_:
+rule map_reads:
      input: forward = READS_DIR + "/{sample}{FORWARD}", reverse = READS_DIR + "/{sample}{REVERSE}", reference = {STAR_REF}
      output: samFile = MAPPEDREADS + "/{sample}/Aligned.out.sam.sam", LogFile = MAPPEDREADS + "/{sample}/Log.final.out"
      threads: 8
