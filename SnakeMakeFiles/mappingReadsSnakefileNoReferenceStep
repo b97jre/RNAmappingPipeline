@@ -10,10 +10,10 @@ rule map_reads:
      input: forward = MAIN_DIR + "reads/{sample}.1.fastq.gz", reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", reference = MAIN_DIR +"reference/STARreference"
      output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out" ,dir = MAIN_DIR + "mapping/{sample}/"
      threads: 8
-     shell: "STAR --genomeDir {input.reference} --readFilesIn {input.forward} {input.reverse} --runThreadN 8 --readFilesCommand zcat --outFileNamePrefix {output.dir}
+     shell: "STAR --genomeDir {input.reference} --readFilesIn {input.forward} {input.reverse} --runThreadN 8 --readFilesCommand zcat --outFileNamePrefix {output.dir}"
 
 
-rule samtools_sam2bam_hairpin:
+rule samtools_sam2bam:
      input: MAIN_DIR + "mapping/{sample}/Aligned.out.sam"
      output: temp(MAIN_DIR + "mapping/{sample}.bam")
      shell: "samtools view -h -bS {input} -o {output}"
