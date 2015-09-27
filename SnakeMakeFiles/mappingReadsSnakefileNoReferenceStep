@@ -16,7 +16,7 @@ rule map_reads:
      input: forward = MAIN_DIR + "reads/{sample}.1.fastq.gz", reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", reference = MAIN_DIR +"reference/STARreference"
      output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out"
      threads: 8
-     shell: "STAR --genomeDir {input.reference} --readFilesIn input.forward input.reverse --runThreadN 8 --readFilesCommand zcat "
+     shell: "STAR --genomeDir {input.reference} --readFilesIn {input.forward} {input.reverse} --runThreadN 8 --readFilesCommand zcat "
 
 rule softLink_SamFiles:
      input: MAIN_DIR + "mapping/{SAMPLES}/Aligned.out.sam"
