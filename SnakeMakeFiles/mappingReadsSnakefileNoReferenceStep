@@ -4,11 +4,8 @@ include:"pipeline.conf"
 rule all:
      input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample=SAMPLE, suffix = SUFFIX)
 
-# Run FASTQC on samples;
-rule run_fastQC:
-  input: MAIN_DIR + "reads/{sample}.{suffix}"
-  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
-  shell: "fastqc {input}"
+
+
 
 
 
@@ -46,6 +43,13 @@ rule samtools_index_hairpin:
      shell: "samtools index {input}"
 
 
+#######################################################
+# Mapping reds
+# Run FASTQC on samples;
+rule run_fastQC:
+  input: MAIN_DIR + "reads/{sample}.{suffix}"
+  output: MAIN_DIR +"reads/{sample}.{suffix}zip"
+  shell: "fastqc {input}"
 
 rule link_LogFiles:
      input: MAIN_DIR + "mapping/{sample}/Log.final.out"
