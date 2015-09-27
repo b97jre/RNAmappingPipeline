@@ -52,7 +52,7 @@ rule link_LogFiles:
 rule count_reads_per_gene:
      input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
      output: MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt"
-     shell: "htseq-count  -t miRNA -i Name -a 0 -f bam -r pos -s yes {input.bam} {input.gff} > {output}"
+     shell: "htseq-count -t exon  -i gene_id   -f bam -r pos -s no {input.bam} {input.gff} > {output}"
 
 
 
