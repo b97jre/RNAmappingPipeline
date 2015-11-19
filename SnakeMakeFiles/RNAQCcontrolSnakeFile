@@ -21,13 +21,13 @@ rule run_fastQC:
 rule GTF2GenePred:
   input: MAIN_DIR + 'reference/annotation/contigs.gtf'
   output: MAIN_DIR + 'reference/annotation/contigs.genePred'
-  shell: gtfToGenePred {input}  {output}
+  shell: 'gtfToGenePred {input}  {output}'
 
 # Convert GenePred to Bed12
 rule GTF2BED12:
   input: MAIN_DIR + 'reference/annotation/contigs.genePred'
   output: MAIN_DIR + 'reference/annotation/contigs.bed'
-  shell: genePredToBed  {input}  {output}
+  shell: 'genePredToBed  {input}  {output}'
 
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
