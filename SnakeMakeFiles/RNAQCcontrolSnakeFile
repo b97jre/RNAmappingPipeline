@@ -32,7 +32,7 @@ rule GTF2BED12:
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
   input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
-  output: MAIN_DIR + "RSeQC/{sample}.clipping_profile.r
+  output: MAIN_DIR + "RSeQC/{sample}.clipping_profile.r"
   run:
     shell('tin.py -i {input.bam} -o RSeQC/{wildcards.sample}')
     shell('clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample}')
