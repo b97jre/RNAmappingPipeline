@@ -1,0 +1,60 @@
+
+
+#### FASTQC snakemake START #######
+# Run FASTQC on samples;
+rule run_fastQC:
+  input: MAIN_DIR + "reads/{sample}.{suffix}.fastq.gz"
+  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
+  shell: "fastqc {input}"
+
+
+#### FASTQC snakemake STOP #######
+
+#### RSeQC snakemake START #######
+
+# Convert GTF to GenePred
+rule GTF2GenePred:
+  input: MAIN_DIR + 'reference/annotation/contigs.gtf'
+  output: MAIN_DIR + 'reference/annotation/contigs.genePred'
+  shell: gtfToGenePred {input}  {output}
+
+# Convert GenePred to Bed12
+rule GTF2BED12:
+  input: MAIN_DIR + 'reference/annotation/contigs.genePred'
+  output: MAIN_DIR + 'reference/annotation/contigs.bed'
+  shell: genePredToBed  {input}  {output}
+
+
+
+rule RSEQC_clipping_profile:
+  input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
+  output: MAIN_DIR + "RSeQC/
+  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample}.clippling_profile
+
+
+rule RSEQC_genebody_coverage:
+  input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
+  output: MAIN_DIR + "RSeQC/
+  run:
+    classes = [",".join(expand("mapped/{sample}.bam", sample=cls)) for cls in SAMPLE]
+    shell('geneBody_coverage.py -r {input.bed} -i {classes} -o RSeQC/{wildcards.sample}.genebody_coverage
+
+
+rule RSEQC_inner_coverage:
+  input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
+  output: MAIN_DIR + "RSeQC/
+  shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}.genebody_coverage
+
+
+inner_distance.py -i Pairend_nonStrandSpecific_36mer_Human_hg19.bam -o output -r hg19.refseq.bed12
+
+
+############################################### RSeQC snakemake STOP ##################################
+
+####################################GATHER ALL THE DATA USING multiQC######################################
+
+# Gather all the QC results using multiQC
+rule gatherQCdta:
+  input: bamIndex = expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), STARlog =  expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), fastQC =  expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample = SAMPLE,suffix = SUFFIX)
+  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
+  shell:

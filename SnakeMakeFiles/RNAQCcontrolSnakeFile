@@ -1,0 +1,56 @@
+
+
+rule all:
+     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE)
+
+
+#### FASTQC snakemake START #######
+# Run FASTQC on samples;
+rule run_fastQC:
+  input: MAIN_DIR + "reads/{sample}.{suffix}.fastq.gz"
+  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
+  shell: "fastqc {input}"
+
+
+
+#### FASTQC snakemake STOP #######
+
+#### RSeQC snakemake START #######
+
+# Convert GTF to GenePred
+rule GTF2GenePred:
+  input: MAIN_DIR + 'reference/annotation/contigs.gtf'
+  output: MAIN_DIR + 'reference/annotation/contigs.genePred'
+  shell: gtfToGenePred {input}  {output}
+
+# Convert GenePred to Bed12
+rule GTF2BED12:
+  input: MAIN_DIR + 'reference/annotation/contigs.genePred'
+  output: MAIN_DIR + 'reference/annotation/contigs.bed'
+  shell: genePredToBed  {input}  {output}
+
+# Get length count for the contigs in the sequence.
+rule RSEQC_single_bam
+  input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
+  output: MAIN_DIR + "RSeQC/{sample}.clipping_profile.r
+  run:
+    shell('tin.py -i {input.bam} -o RSeQC/{wildcards.sample}')
+    shell('clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample}')
+    shell('inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}.genebody_coverage')
+    shell('junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}.junction_saturation')
+    shell('geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}.geneBody_coverage')
+
+
+
+############################################### RSeQC snakemake STOP ##################################
+
+####################################GATHER ALL THE QC DATA USING multiQC######################################
+
+# Gather all the QC results using multiQC
+rule gatherQCdta:
+  input: bamIndex = expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), STARlog =  expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), fastQC =  expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample = SAMPLE,suffix = SUFFIX)
+  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
+  shell:multiqc MAIN_DIR
+
+
+
