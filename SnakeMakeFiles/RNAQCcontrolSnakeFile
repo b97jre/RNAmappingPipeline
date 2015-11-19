@@ -30,7 +30,7 @@ rule GTF2BED12:
   shell: genePredToBed  {input}  {output}
 
 # Get length count for the contigs in the sequence.
-rule RSEQC_single_bam
+rule RSEQC_single_bam:
   input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: MAIN_DIR + "RSeQC/{sample}.clipping_profile.r
   run:
