@@ -4,20 +4,25 @@ include:"pipeline.conf"
 rule all:
      input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample=SAMPLE, suffix = SUFFIX)
 
-# Run FASTQC on samples;
-rule run_fastQC:
-  input: MAIN_DIR + "reads/{sample}.{suffix}"
-  output: MAIN_DIR +"reads/{sample}.{suffix}.zip"
-  shell: "fastqc {input}"
+
+
+
 
 
 
 #Create  STAR Reference
-rule create_STAR_reference:
+rule create_STAR_reference_with_GTF:
   input: fasta = MAIN_DIR + 'reference/fasta/contigs.fa', gtf = MAIN_DIR + 'reference/annotation/contigs.gtf'
   output: MAIN_DIR +"reference/STARreference"
-  threads : 8
+  threads : 16
+  shell: "STAR --runThreadN 16 --runMode genomeGenerate --genomeDir {output} --genomeFastaFiles {input.fasta} --sjdbGTFfile {input.gtf} --sjdbOverhang {READLENGTH}-1 "
+
+rule create_STAR_reference_without_annotation:
+  input: fasta = MAIN_DIR + 'reference/fasta/contigs.fa', gtf = MAIN_DIR + 'reference/annotation/contigs.gtf'
+  output: MAIN_DIR +"reference/STARreference"
+  threads : 16
   shell: "testing"
+
 
 # Map
 rule map_reads:
@@ -51,11 +56,6 @@ rule samtools_index_hairpin:
      shell: "samtools index {input}"
 
 
-
-rule link_LogFiles:
-     input: MAIN_DIR + "mapping/{sample}/Log.final.out"
-     output: MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out"
-     shell: "ln -s {input} {output}"
 
 # Estimate counts
 
