@@ -2,14 +2,14 @@ include:"pipeline.conf"
 
 
 rule all:
-     input: MAIN_DIR + "multiqc_report.html"", MAIN_DIR +"RSeQC_report.pdf")
+     input: MAIN_DIR + "multiqc_report.html"", MAIN_DIR +"RSeQC_report.pdf"
 
 
 #### FASTQC snakemake START #######
 # Run FASTQC on samples;
 rule run_fastQC:
-  input: MAIN_DIR + "reads/{sample}.{suffix}.fastq.gz"
-  output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html"
+  input: MAIN_DIR + "reads/{sample}.{suffix}.fastq.gz" ,sample = SAMPLE, suffix = SUFFIX
+  output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html",sample = SAMPLE, suffix = SUFFIX
   shell: "fastqc {input}"
 
 #### FASTQC snakemake STOP #######
@@ -30,7 +30,7 @@ rule GTF2BED12:
 
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
-  input: rseqcdir =MAIN_DIR + "RSeQC" , bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed', layout = LAYOUT
+  input: rseqcdir =MAIN_DIR + "RSeQC" , bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed', layout = LAYOUT,sample = SAMPLE
   output: MAIN_DIR + "RSeQC/{sample}.clipping_profile.r"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
