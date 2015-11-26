@@ -56,7 +56,7 @@ rule gatherQCdta:
   shell: 'multiqc ' + MAIN_DIR
 
 rule gatherRSEQCdta:
-  input:  RSEQCinfo=  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE), sample = SAMPLE)
+  input:  RSEQCinfo =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE)
   output: MAIN_DIR +"RSeQC_report.pdf"
   shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R "+ MAIN_DIR +"RSeQC"
 
