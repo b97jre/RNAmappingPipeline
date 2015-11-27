@@ -8,8 +8,8 @@ rule all:
 #### FASTQC snakemake START #######
 # Run FASTQC on samples;
 rule run_fastQC:
-  input: MAIN_DIR + "reads/{sample}.{suffix}.fastq.gz" ,sample = SAMPLE, suffix = SUFFIX
-  output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html",sample = SAMPLE, suffix = SUFFIX
+  input: MAIN_DIR + 'reads/{sample}.{suffix}.fastq.gz' ,sample = SAMPLE, suffix = SUFFIX
+  output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html"
   shell: "fastqc {input}"
 
 #### FASTQC snakemake STOP #######
