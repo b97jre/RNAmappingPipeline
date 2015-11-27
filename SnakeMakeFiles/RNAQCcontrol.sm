@@ -30,16 +30,16 @@ rule GTF2BED12:
 
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
-  input: rseqcdir = MAIN_DIR + "RSeQC" , (bam = MAIN_DIR + "mapping/{sample}.sort.bam", sample = SAMPLE), bed = MAIN_DIR + 'reference/annotation/contigs.bed' 
+  input: rseqcOutPut = MAIN_DIR + "RSeQC/{sample}" , bam = MAIN_DIR + "mapping/{sample}.sort.bam" , sample = SAMPLE, bed = MAIN_DIR + 'reference/annotation/contigs.bed' 
   output: MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
-    shell('mv {wildcards.sample}.tin.xls {rseqcdir}/{wildcards.sample}.tin.xls')
-    shell('mv {wildcards.sample}.summary.txt {input.dir}RSeQC/{wildcards.sample}.tin.summary.txt')
-##   shell('clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s {input.layout}')
-    shell('inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}')
-    shell('junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}')
-    shell('geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}')
+    shell('mv {wildcards.sample}.tin.xls {input.rseqcOutPut}.tin.xls')
+    shell('mv {wildcards.sample}.summary.txt {input.rseqcOutPut}.tin.summary.txt')
+##   shell('clipping_profile.py -i {input.bam} -o {input.rseqcOutPut} -s {input.layout}')
+    shell('inner_distance.py -r {input.bed} -i {input.bam} -o {input.rseqcOutPut}')
+    shell('junction_saturation.py -r {input.bed} -i {input.bam} -o {input.rseqcOutPut}')
+    shell('geneBody_coverage.py -r {input.bed} -i {input.bam}  -o {input.rseqcOutPut}')
 
 
 
