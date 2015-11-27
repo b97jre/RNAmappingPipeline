@@ -30,7 +30,7 @@ rule GTF2BED12:
 
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
-  input: rseqcdir = MAIN_DIR + "RSeQC" , bam = MAIN_DIR + "mapping/{sample}.sort.bam", bed = MAIN_DIR + 'reference/annotation/contigs.bed',sample = SAMPLE
+  input: rseqcdir = MAIN_DIR + "RSeQC" , (bam = MAIN_DIR + "mapping/{sample}.sort.bam", sample = SAMPLE), bed = MAIN_DIR + 'reference/annotation/contigs.bed' 
   output: MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
