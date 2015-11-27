@@ -2,13 +2,13 @@ include:"pipeline.conf"
 
 
 rule all:
-  input: MAIN_DIR + "multiqc_report.html", MAIN_DIR +"RSeQC_report.pdf"
+  input: MAIN_DIR + "multiqc_report.html", MAIN_DIR +"RSeQC_report.pdf",sample = SAMPLE, suffix = SUFFIX
 
 
 #### FASTQC snakemake START #######
 # Run FASTQC on samples;
 rule run_fastQC:
-  input: MAIN_DIR + 'reads/{sample}.{suffix}.fastq.gz' ,sample = SAMPLE, suffix = SUFFIX
+  input: MAIN_DIR + 'reads/{sample}.{suffix}.fastq.gz' 
   output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html"
   shell: "fastqc {input}"
 
@@ -30,7 +30,7 @@ rule GTF2BED12:
 
 # Get length count for the contigs in the sequence.
 rule RSEQC_single_bam:
-  input: rseqcOutPut = MAIN_DIR + "RSeQC/{sample}" , bam = MAIN_DIR + "mapping/{sample}.sort.bam" , sample = SAMPLE, bed = MAIN_DIR + 'reference/annotation/contigs.bed' 
+  input: rseqcOutPut = MAIN_DIR + "RSeQC/{sample}" , bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
