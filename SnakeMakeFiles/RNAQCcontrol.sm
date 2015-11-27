@@ -2,7 +2,7 @@ include:"pipeline.conf"
 
 
 rule all:
-  input: MAIN_DIR + "multiqc_report.html", MAIN_DIR +"RSeQC_report.pdf",sample = SAMPLE, suffix = SUFFIX,  layout = LAYOUT
+  input: MAIN_DIR + "multiqc_report.html", MAIN_DIR +"RSeQC_report.pdf"
 
 
 #### FASTQC snakemake START #######
