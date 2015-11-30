@@ -69,7 +69,7 @@ rule gatherQCdta:
   shell: 'multiqc ' + MAIN_DIR
 
 rule gatherRSEQCdta:
-  input:  RSEQCinfo =  expand(MAIN_DIR + "RSeQC/{sample}.sort.tin.summary.txt", sample=SAMPLE), expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE) 
+  input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.sort.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE)
   output: MAIN_DIR +"RSeQC_report.pdf"
   shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R "+ MAIN_DIR +"RSeQC"
 
