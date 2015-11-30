@@ -58,9 +58,6 @@ rule RSEQC_geneBody_coverage_single_bam:
   shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}')
 
 
-
-
-
 ############################################### RSeQC snakemake STOP ##################################
 
 ####################################GATHER ALL THE QC DATA USING multiQC######################################
