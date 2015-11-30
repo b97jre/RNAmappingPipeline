@@ -40,22 +40,22 @@ rule RSEQC_TIN_single_bam:
 rule RSEQC_clipping_profile_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" 
   output: gbc = MAIN_DIR + "RSeQC/{sample}.clipping_profile.r"
-  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s '+LAYOUT)
+  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s '+LAYOUT
 
 rule RSEQC_inner_distance_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt" 
-  shell: 'inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}')
+  shell: 'inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}'
  
 rule RSEQC_junction_saturation_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r" 
-  shell: 'junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}')
+  shell: 'junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}'
 
 rule RSEQC_geneBody_coverage_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r" 
-  shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}')
+  shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}'
 
 
 ############################################### RSeQC snakemake STOP ##################################
