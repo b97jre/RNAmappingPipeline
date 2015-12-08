@@ -69,7 +69,7 @@ rule RSEQC_read_distribution:
 # Gather all the QC results using multiQC
 rule gatherQCdta:
   input: STARlog =  expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), fastQC =  expand(MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html", sample = SAMPLE,suffix = SUFFIX)
-  output: MAIN_DIR +"multiqc_report.html"
+  output: MAIN_DIR +"multiqc_report.zip"
   shell: 'multiqc ' + MAIN_DIR
 
 rule gatherRSEQCdta:
