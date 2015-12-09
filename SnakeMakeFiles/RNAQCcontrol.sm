@@ -31,11 +31,11 @@ rule GTF2BED12:
 # Get length count for the contigs in the sequence.
 rule RSEQC_TIN_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
-  output: exelFile = MAIN_DIR + "RSeQC/{sample}.sort.tin.xls" , summaryFile = MAIN_DIR + "RSeQC/{sample}.sort.tin.summary.txt"
+  output: exelFile = MAIN_DIR + "RSeQC/{sample}.tin.xls" , summaryFile = MAIN_DIR + "RSeQC/{sample}.tin.summary.txt"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
-    shell('mv {wildcards.sample}.sort.tin.xls {output.exelFile}')
-    shell('mv {wildcards.sample}.sort.summary.txt {output.summaryFile}')
+    shell('mv {wildcards.sample}.tin.xls {output.exelFile}')
+    shell('mv {wildcards.sample}.tin.summary.txt {output.summaryFile}')
 
 rule RSEQC_clipping_profile_single_bam:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam"
@@ -60,6 +60,7 @@ rule RSEQC_geneBody_coverage_single_bam:
 rule RSEQC_read_distribution:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: read_dist = MAIN_DIR + "RSeQC/{sample}.read_distribution.txt"
+  threads : 16
   shell: 'read_distribution.py -r {input.bed} -i {input.bam}  > {output.read_dist}'
 
 ############################################### RSeQC snakemake STOP ##################################
@@ -73,7 +74,7 @@ rule gatherQCdta:
   shell: 'multiqc ' + MAIN_DIR
 
 rule gatherRSEQCdta:
-  input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.sort.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
+  input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
   output: MAIN_DIR +"RSeQC_report.pdf"
   shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R "+ MAIN_DIR +"RSeQC"
 
