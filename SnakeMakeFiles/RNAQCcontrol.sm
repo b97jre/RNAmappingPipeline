@@ -60,6 +60,7 @@ rule RSEQC_geneBody_coverage_single_bam:
 rule RSEQC_read_distribution:
   input:  bam = MAIN_DIR + "mapping/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: read_dist = MAIN_DIR + "RSeQC/{sample}.read_distribution.txt"
+  threads : 16
   shell: 'read_distribution.py -r {input.bed} -i {input.bam}  > {output.read_dist}'
 
 ############################################### RSeQC snakemake STOP ##################################
