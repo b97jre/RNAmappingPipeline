@@ -2,7 +2,7 @@ include:"pipeline.conf"
 
 # The ultimate output files we want to get
 rule all:
-     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), expand(MAIN_DIR +"reads/{sample}.{suffix}.zip", sample=SAMPLE, suffix = SUFFIX)
+     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE))
 
 #Create  STAR Reference
 rule create_STAR_reference_with_GTF:
@@ -27,26 +27,33 @@ rule map_reads:
 
 rule softLink_SamFiles:
      input: MAIN_DIR + "mapping/{SAMPLES}/Aligned.out.sam"
-     output: MAIN_DIR + "mapping/{SAMPLES}.sam"
+     output: MAIN_DIR + "mapping/bamFiles/{SAMPLES}.sam"
      shell: "ln -s {input} {output}"
 
+rule softLink_LogFiles:
+     input: MAIN_DIR + "mapping/{SAMPLES}/Log.final.out"
+     output: MAIN_DIR + "mapping/logFiles/{SAMPLES}.Log.final.out"
+     shell: "ln -s {input} {output}"
+    	 
+    	 
+    	 
 rule samtools_sam2bam_hairpin:
-     input: MAIN_DIR + "mapping/{sample}.sam"
-     output: MAIN_DIR + "mapping/{sample}.bam"
+     input: MAIN_DIR + "mapping/bamFiles/{sample}.sam"
+     output: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
      shell: "samtools view "+ SAMTOOLS_VIEW_FLAGS +"  {input} -o {output}"
 
 # Sort the BAM files
 rule samtools_sort_hairpin:
-     input: MAIN_DIR + "mapping/{sample}.bam"
-     output: MAIN_DIR + "mapping/{sample}.sort.bam"
+     input: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
+     output: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
      shell: "samtools sort {input} {MAIN_DIR}/mapping/{wildcards.sample}.sort"
 
 
 # Index the sorted BAM files
 
 rule samtools_index_hairpin:
-     input: MAIN_DIR + "mapping/{sample}.sort.bam"
-     output: MAIN_DIR + "mapping/{sample}.sort.bam.bai"
+     input: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
+     output: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai"
      shell: "samtools index {input}"
 
 # Estimate counts
