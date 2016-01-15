@@ -60,7 +60,7 @@ rule samtools_index_hairpin:
 
 # count reads for each miRNA  and merge them
 rule count_reads_per_gene:
-     input: bam = MAIN_DIR + "mapping/{sample}.sort.bam", gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+     input: bam = MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam", gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
      output: MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt"
      shell: "htseq-count  "+ HTSEQ_COUNT_FLAGS +"  {input.bam} {input.gff} > {output}"
 
