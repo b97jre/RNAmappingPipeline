@@ -17,50 +17,56 @@ gg_shapeValues  <- function(n){
 }
 
 
+plotSample2SampleDistance<- function(normData ){
+  sampleDists <- dist( t( normData ) )
+  sampleDistMatrix <- as.matrix( sampleDists )
+  colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+  colnames(sampleDistMatrix) = NULL
+  pheatmap(sampleDistMatrix,
+           clustering_distance_rows=sampleDists,
+           clustering_distance_cols=sampleDists,
+           col=colors)
+}
 
-runPC <- function(values, metaDataTable, n.comp = 5,scale = FALSE, center = TRUE,
-                  sampleColName = "Name", colorComponent = NULL , pchComponent = NULL){
+
+
+
+runPCA <- function(values, metaDataTable, n.comp = 5,scale = FALSE, center = TRUE){
+  plot.comp = 1:n.comp
+
   #Find principal components
   prcompResult = prcomp(t(values), scale=scale, center=center)
-  plot.comp = 1:n
-  createMultipePCAplot(prcompResult,metaDataTable,plot.comp, scale =scale, center = center,
-                       sampleColName = sampleColName, colorComponent = colorComponent , pchComponent = pchComponent)
+  pca.basis = prcompResult[['x']]
+  pca.basis = pca.basis[order(rownames(pca.basis) ),]
+
+
+  e.var = (prcompResult[['sdev']]^2 / sum(prcompResult[['sdev']]^2))[plot.comp]
+  e.var = as.data.frame( e.var)
+  e.var$components = colnames(pca.basis)[plot.comp]
+  e.var$info = sprintf('%s: %.1f%s',e.var$components,e.var$e.var*100, "%")
+
+  #MetadataInfo
+  metaInfo = metaDataTable[metaDataTable[[sampleColName]] %in% rownames(pca.basis),  ]
+  rownames(metaInfo) <- metaInfo[[sampleColName]]
+  metaInfo = metaInfo[order(rownames(metaInfo)),]
+
+  PCAinfo = cbind(as.data.frame(pca.basis[, plot.comp]),metaInfo )
+  varianceInfo = e.var
 
 
 }
 
 
 # Create PCAplot requires that the colnames in the expressionTable are present in the metaDataTable[sampleColName, ]
-createMultipePCAplot <- function(prcompResult, metaDataTable, plot.comp = 1:5,
+plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
                                  sampleColName = "Name", colorComponent = NULL , pchComponent = NULL)
 
-# Nr of components
-plot.comp
-n.comp = length(plot.comp)
-
-#Plot info
-pca.basis = prcompResult[['x']]
-pca.basis = pca.basis[order(rownames(pca.basis) ),]
-
-# PC componenet information info
-e.var = (prcompResult[['sdev']]^2 / sum(prcompResult[['sdev']]^2))[plot.comp]
-e.var = as.data.frame( e.var)
-
-
-e.var$components = colnames(pca.basis)[plot.comp]
-e.var$info = sprintf('%s: %.1f%s',e.var$components,e.var$e.var*100, "%")
-
-
-
-#Table info
-metaInfo = metaDatatable[metaDatatable[[sampleColName]] %in% rownames(pca.basis),  ]
-rownames(metaInfo) <- metaInfo[[sampleColName]]
-metaInfo = metaInfo[order(rownames(metaInfo)),]
-
-
-ggInfo = as.data.frame(pca.basis[, plot.comp])
-ggInfo[pchComponent] = metaInfo[pchComponent]
-ggInfo[colorComponent] = metaInfo[colorComponent]
+ggInfo = PCAinfo[,1:n.comp]
+ggInfo[colorComponent] = PCAinfo[colorComponent]
+ggInfo['colorComponent'] = PCAinfo[colorComponent]
+ggInfo[pchComponent] = PCAinfo[pchComponent]
+ggInfo['pchComponent'] = PCAinfo[pchComponent]
+ggInfo['pchComponent'] = PCAinfo[pchComponent]
 ggInfo[paste(pchComponent, colorComponent, sep = "_")] =as.factor(paste(ggInfo[[pchComponent]], ggInfo[[colorComponent]], sep = "_"))
 
 breakInfo =  as.data.frame(levels(ggInfo[[paste(pchComponent, colorComponent, sep = "_")]]))
@@ -70,6 +76,8 @@ breakInfo$shapeLevels = as.factor(ll[seq(from = 1, to = length(ll)-1, by = 2)])
 breakInfo$colourLevels = as.factor(ll[seq(from = 2, to = length(ll), by = 2)])
 breakInfo$colourValues = "black"
 breakInfo$shapeValues = 16
+
+
 
 
 df = data.frame(colLevels = levels(breakInfo$colourLevels), colValues = gg_color_hue(length(levels(breakInfo$colourLevels))))
@@ -83,21 +91,21 @@ for( i in 1:length(df$shapeLevels)){
 }
 
 
-pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp+1)) , params = c(adjust = 0.5),
+pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp+2)) ,
+                   params = c(adjust = 0.5,binwidth = 0.1),
+                   axisLabels="internal",
                    colour=colorComponent,  shape = pchComponent, linetype = pchComponent,
+                   upper = list(continuous = "blank", combo = 'box', discrete = "blank"),
                    lower = list(continuous = "points", combo = "blank", discrete = "blank"),
-                   upper = list(continuous = "blank", combo = 'box', discrete = "blank")
+                   diag  = list(continuous = "density", discrete = "blank")
 )
-
-plot <- ggplot2::ggplot()
-plot <- plot +
-  ggplot2::scale_y_discrete(name="",  limits = c("Line","Shape","Colour", "Head")) +
-  ggplot2::scale_x_continuous(limits=c(0,1), breaks=NULL, name="") +
-  ggplot2::geom_text(data=NULL, mapping=aes(y='Line', x=0.05,label = pchComponent,hjust=0), size=4)+
-  ggplot2::geom_text(data=NULL, mapping=aes(y='Shape', x=0.05,label = pchComponent,hjust=0), size=4)+
-  ggplot2::geom_text(data=NULL, mapping=aes(y='Colour', x=0.05,label =colorComponent,hjust=0), size=4)+
-  ggplot2::geom_text(data=NULL, mapping=aes(y='Head', x=0.05,label ="Legend info",hjust=0), size=4)
-pcaPlot <- putPlot(pcaPlot, plot, n.comp+1, 1)
+colorComponent[[1]]
+ggplot(ggInfo, aes(x = (e.var$components[i]), colour=colorComponent,linetype = pchComponent))+geom_density(adjust = 0.2)
+for(i in 1:length(e.var$components)){
+  plot <- ggplot2::ggplot(ggInfo, aes(x = e.var$components[i], colour=colorComponent,linetype = pchComponent))
+  plot <- plot + ggplot2::geom_density(adjust = 0.2)
+  pcaPlot <- putPlot(pcaPlot, plot, n.comp+1, i)
+}
 
 
 plot <- ggplot2::ggplot()
