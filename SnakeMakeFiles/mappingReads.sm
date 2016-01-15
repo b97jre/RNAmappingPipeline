@@ -2,7 +2,7 @@ include:"pipeline.conf"
 
 # The ultimate output files we want to get
 rule all:
-     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE))
+     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE)
 
 #Create  STAR Reference
 rule create_STAR_reference_with_GTF:
