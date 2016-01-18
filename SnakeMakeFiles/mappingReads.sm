@@ -21,18 +21,18 @@ rule create_STAR_reference_with_GTF:
 # Map
 rule map_reads:
      input: forward = MAIN_DIR + "reads/{sample}.1.fastq.gz", reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", reference = MAIN_DIR +"reference/STARreference"
-     output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out"
+     output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out", SampleDir =  MAIN_DIR + "mapping/{sample}/"
      threads: 8
-     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir {input.reference} --readFilesIn input.forward input.reverse --runThreadN 8 --readFilesCommand zcat "
+     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir {input.reference} --readFilesIn input.forward input.reverse --runThreadN 8 --readFilesCommand zcat  --outFileNamePrefix = {output.SampleDir}"
 
 rule softLink_SamFiles:
-     input: MAIN_DIR + "mapping/{SAMPLES}/Aligned.out.sam"
-     output: temp(MAIN_DIR + "mapping/bamFiles/{SAMPLES}.sam")
+     input: MAIN_DIR + "mapping/{sample}/Aligned.out.sam"
+     output: temp(MAIN_DIR + "mapping/bamFiles/{sample}.sam")
      shell: "ln -s {input} {output}"
 
 rule softLink_LogFiles:
-     input: MAIN_DIR + "mapping/{SAMPLES}/Log.final.out"
-     output: MAIN_DIR + "mapping/logFiles/{SAMPLES}.Log.final.out"
+     input: MAIN_DIR + "mapping/{sample}/Log.final.out"
+     output: MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out"
      shell: "ln -s {input} {output}"
     	 
     	 
