@@ -3,8 +3,6 @@ install.packages("rmarkdown")
 library(reshape2)
 library(ggplot2)
 library(gridExtra)
-7
-
 
 
 LinetypeValues = rep(c(rep("solid", 9), rep("dashed", 9),rep("dotted", 9), rep("dotdash", 9),rep("longdash", 9), rep("twodash", 9)), 40)
@@ -14,11 +12,11 @@ plotValues = data.frame(linetype = LinetypeValues, color = colorValues)
 
 
 RSeQCdir = 'RSeQC'
-metaInfo <- read.table("MetaData.tab.table.txt", sep = "\t", header = TRUE);
+metaInfo <- read.table("metaData.table.tab.txt", sep = "\t", header = TRUE);
 
-
+getAllPlots(dir = RSeQCdir, sampleName = )
 ##################################################################################main function
-getAllPlots <- function(dir, fileName, sampleName){
+getAllPlots <- function(dir, metaInfoTable){
 
   # Getting read distribution info
   Groups = c("TES_down_10kb","TES_down_5kb","TES_down_1kb","TSS_up_10kb","TSS_up_5kb","TSS_up_1kb","Introns","3'UTR_Exons","5'UTR_Exons","CDS_Exons")
