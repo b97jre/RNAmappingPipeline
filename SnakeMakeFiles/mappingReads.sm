@@ -46,7 +46,7 @@ rule samtools_sam2bam_hairpin:
 rule samtools_sort_hairpin:
      input: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
      output: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
-     shell: "samtools sort {input} {MAIN_DIR}/mapping/{wildcards.sample}.sort"
+     shell: "samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}.sort"
 
 
 # Index the sorted BAM files
