@@ -37,10 +37,10 @@ rule RSEQC_TIN_single_bam:
     shell('mv {wildcards.sample}.tin.xls {output.exelFile}')
     shell('mv {wildcards.sample}.tin.summary.txt {output.summaryFile}')
 
-rule RSEQC_clipping_profile_single_bam:
+rule 	_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
   output: gbc = MAIN_DIR + "RSeQC/{sample}.clipping_profile.r"
-  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s '+LAYOUT
+  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s "'+LAYOUT+'"'
 
 rule RSEQC_inner_distance_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
