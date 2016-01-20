@@ -7,7 +7,7 @@ rule all:
 #Create  STAR Reference
 rule create_STAR_reference_with_GTF:
   input: fasta = MAIN_DIR + 'reference/fasta/contigs.fa', gtf = MAIN_DIR + 'reference/annotation/contigs.gtf'
-  output: MAIN_DIR +"reference/STARreference"
+  output: MAIN_DIR +"reference/STARreference/SAindex"
   threads : 16
   shell: "STAR "+STAR_BUILD_FLAGS +" --runThreadN 16 --runMode genomeGenerate --genomeDir {output} --genomeFastaFiles {input.fasta} --sjdbGTFfile {input.gtf} --sjdbOverhang "+str(READLENGTH -1)
 
