@@ -34,8 +34,8 @@ rule RSEQC_TIN_single_bam:
   output: exelFile = MAIN_DIR + "RSeQC/{sample}.tin.xls" , summaryFile = MAIN_DIR + "RSeQC/{sample}.tin.summary.txt"
   run:
     shell('tin.py -i {input.bam} -r {input.bed}')
-    shell('mv {wildcards.sample}.tin.xls {output.exelFile}')
-    shell('mv {wildcards.sample}.tin.summary.txt {output.summaryFile}')
+    shell('mv {wildcards.sample}.sort.tin.xls {output.exelFile}')
+    shell('mv {wildcards.sample}.sort.tin.summary.txt {output.summaryFile}')
 
 rule 	_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
