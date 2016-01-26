@@ -11,7 +11,7 @@ colorValues =rep( rep(RColorBrewer::brewer.pal(9,"Set1"),6), 40)
 plotValues = data.frame(linetype = LinetypeValues, color = colorValues)
 
 
-RSeQCdir = 'RSeQC'
+RSeQCdir = 'RSEQC'
 metaInfo <- read.table("metaData.table.tab.txt", sep = "\t", header = TRUE);
 
 getAllPlots(dir = RSeQCdir, sampleName = )
@@ -21,9 +21,9 @@ getAllPlots <- function(dir, metaInfoTable){
   # Getting read distribution info
   Groups = c("TES_down_10kb","TES_down_5kb","TES_down_1kb","TSS_up_10kb","TSS_up_5kb","TSS_up_1kb","Introns","3'UTR_Exons","5'UTR_Exons","CDS_Exons")
   RD <- data.frame(Group= factor(levels = Groups ) ,Total_bases = integer(0),Tag_count=integer(0) ,Tags_Kb = numeric(0), TPKM = numeric(0),sampleName = character(0) )
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".read_distribution.txt", sep = '_')
-    RD <-rbind(RD,read_distributionFile(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"read_distribution.txt", sep = '.')
+    RD <-rbind(RD,read_distributionFile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
 
@@ -31,37 +31,37 @@ getAllPlots <- function(dir, metaInfoTable){
   # Getting TIN info
 
   TIN <- data.frame(Group= character(0) ,chrom = character(0),tx_start=integer(0) ,tx_end = integer(0), TIN = numeric(0),sampleName = character(0))
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".tin.xls", sep = '_')
-    TIN <-rbind(TIN,readTINFile(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"tin.xls", sep = '.')
+    TIN <-rbind(TIN,readTINFile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
 
   CP <- data.frame(position = integer(0), R1  = integer(0), R1percentage = numeric(0) ,R2 = integer(0), R2percentage = numeric(0),sampleName = character(0))
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".clipping_profile.r", sep = '_')
-    CP <-rbind(CP,readClippingProfile(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"clipping_profile.r", sep = '.')
+    CP <-rbind(CP,readClippingProfile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
 
   ID <- data.frame(from = integer(0), position  = integer(0),count = integer(0), Percent = numeric(0),sampleName = character(0))
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".inner_distance_freq.txt", sep = '_')
-    ID <-rbind(ID,readInnerDistance(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"inner_distance_freq.txt", sep = '.')
+    ID <-rbind(ID,readInnerDistance(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
 
 
   GBC <- data.frame(position  = integer(0), count = integer(0), Percent = numeric(0),sampleName = character(0))
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".geneBodyCoverage.txt", sep = '_')
-    GBC <-rbind(GBC,readGeneBodyCoverage(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"geneBodyCoverage.txt", sep = '.')
+    GBC <-rbind(GBC,readGeneBodyCoverage(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
   JS <- data.frame(position  = integer(0), knownJunctions = integer(0), AllJunctions = integer(0), NovelJunctions = integer(0), knownJuncionsFraction = numeric(0),NovelJunctionsFraction = numeric(0),sampleName = character(0))
-  for(i in 1: length(metaInfo$Mapping_Name)){
-    fileName = paste(metaInfo$Mapping_Name[i],".junctionSaturation_plot.r", sep = '_')
-    JS <-rbind(JS,read_junctionSaturation(RSeQCdir,fileName,sampleName = metaInfo$Sample[i]))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"junctionSaturation_plot.r", sep = '.')
+    JS <-rbind(JS,read_junctionSaturation(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
   }
 
 

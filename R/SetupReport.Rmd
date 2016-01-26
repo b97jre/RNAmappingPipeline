@@ -1,0 +1,15 @@
+---
+title: "Setup info"
+author: "Johan Reimgård"
+date: "20 Jan 2016"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+
+```{r child = 'SetupInfo.Rmd'}
+```
+
+```{r child = 'table.setup.Rmd'}
+```

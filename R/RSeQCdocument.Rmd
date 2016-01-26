@@ -15,6 +15,8 @@ params:
 This document will be created as last step of the pipeline that is run for mapping RNA reads to a reference. The programs and there versions can be found in the file Programs and setting that is found in the same folder as the working directory of this file. to generate this file  
 
 
+
+
 ## Pipeline run
 
 
