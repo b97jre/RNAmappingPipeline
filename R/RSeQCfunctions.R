@@ -1,4 +1,5 @@
-install.packages("rmarkdown")
+#install.packages("rmarkdown")
+#install.packages("gridExtra")
 
 library(reshape2)
 library(ggplot2)
@@ -11,10 +12,6 @@ colorValues =rep( rep(RColorBrewer::brewer.pal(9,"Set1"),6), 40)
 plotValues = data.frame(linetype = LinetypeValues, color = colorValues)
 
 
-RSeQCdir = 'RSEQC'
-metaInfo <- read.table("metaData.table.tab.txt", sep = "\t", header = TRUE);
-
-getAllPlots(dir = RSeQCdir, sampleName = )
 ##################################################################################main function
 getAllPlots <- function(dir, metaInfoTable){
 
