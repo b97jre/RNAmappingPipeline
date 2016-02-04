@@ -1,0 +1,115 @@
+include:'pipeline.conf'
+
+# The ultimate output files we want to get
+rule all:
+     input: 
+    	 MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt',
+    	 expand(MAIN_DIR + 'mapping/bamFiles/{size}/{sample}.sort.bam.bai', sample=SAMPLE,size=LENGTHS)
+   	 #expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE), 
+ 
+    	 
+#Create  Bowtie Reference
+rule create_Bowtie_reference:
+  input: 
+	  fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
+  output: 
+	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.bt1' 
+  threads : 16
+  shell: 
+	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
+
+
+# remove adapterSequence from files. 
+rule trim_reads:
+    input: 
+    	fastq = MAIN_DIR + 'reads/{sample}.fastq.gz'
+    output: 
+    	fastq = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
+    threads: 1
+    shell: 
+    	'cutadapt '+CUT_ADAPT_FLAGS +'-a '+CUT_ADAPT_ADAPTER+' -o {output.fastq} {input.fastq}'
+	
+# Map
+	
+rule map_reads:
+     input: 
+    	 read = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz', 
+    	 reference = MAIN_DIR +'reference/BowtieReference/contigs.bt1'
+     output: 
+    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
+     threads: 8
+     shell: 
+    	 'bowtie '+BOWTIE_MAPPING_FLAGS+' -S {input.reference} {input.read} > {output}'
+    	 
+rule split_sam_file:
+	 input: 
+		 reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
+	 output: 
+		 expand(MAIN_DIR + 'mapping/bamFiles/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS)
+	 run: 
+		 for readfile in input.reads:
+			 shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samExtractLength -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
+
+    	 
+rule samtools_sam2bam:
+     input: 
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
+     output: 
+    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.bam')
+     shell: 
+    	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
+
+    	 
+# Sort the BAM files
+rule samtools_sort:
+     input: 
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+     output: 
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam'
+     shell: 
+    	 'samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}.sort'
+
+
+    
+    	 
+# Index the sorted BAM files
+
+rule samtools_index_hairpin:
+     input: 
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam'
+     output: 
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai'
+     shell: 
+    	 'samtools index {input}'
+
+    	 
+# Estimate counts
+
+# count reads for each miRNA  and merge them
+rule count_reads_per_gene:
+     input: 
+    	 bam = MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam', 
+    	 gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+     output: 
+    	 MAIN_DIR + 'mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt'
+     shell: 
+    	 'htseq-count  '+ HTSEQ_COUNT_FLAGS +'  {input.bam} {input.gff} > {output}'
+
+rule count_reads_per_gene_sub:
+     input: 
+    	 bam = MAIN_DIR + 'mapping/bamFiles/{size}/{sample}.sort.bam', 
+    	 gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+     output: 
+    	 MAIN_DIR + 'mapping/htseqGene/{size}/{sample}.Stranded.htseq-count.sort.txt'
+     shell: 
+    	 'htseq-count  '+ HTSEQ_COUNT_FLAGS +'  {input.bam} {input.gff} > {output}'
+
+
+rule merge_reads_per_gene_into_one_file:
+     input:  
+    	 expand(MAIN_DIR + 'mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt', sample=SAMPLE)
+     output: 
+    	 MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt'
+     shell: 
+    	 'java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output}'
+

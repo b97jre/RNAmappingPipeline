@@ -2,13 +2,23 @@
 title: "Setup info"
 author: "Johan Reimgård"
 date: "20 Jan 2016"
+
 output: 
   html_document:
     toc: true
     theme: united
+
+
+params:
+  tableDir: "test"
 ---
 
-```{r child = 'SetupInfo.Rmd'}
+```{r}
+
+print(params$tableDir)
+```
+
+```{r child = paste(params$tableDir,'SetupInfo.Rmd', sep = "/")}
 ```
 
 ```{r child = 'table.setup.Rmd'}

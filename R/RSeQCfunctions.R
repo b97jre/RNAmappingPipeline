@@ -13,7 +13,7 @@ plotValues = data.frame(linetype = LinetypeValues, color = colorValues)
 
 
 ##################################################################################main function
-getAllPlots <- function(dir, metaInfoTable){
+getAllPlots <- function(dir, metaInfo){
 
   # Getting read distribution info
   Groups = c("TES_down_10kb","TES_down_5kb","TES_down_1kb","TSS_up_10kb","TSS_up_5kb","TSS_up_1kb","Introns","3'UTR_Exons","5'UTR_Exons","CDS_Exons")
