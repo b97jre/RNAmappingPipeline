@@ -16,7 +16,7 @@ rule create_Bowtie_reference:
 	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.bt1' 
   threads : 16
   shell: 
-	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
+	  'bowtie-build '+BOWTIE_BUILD_FLAGS +' -p {threads} {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
 
 
 # remove adapterSequence from files. 
@@ -27,7 +27,7 @@ rule trim_reads:
     	fastq = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
     threads: 1
     shell: 
-    	'cutadapt '+CUT_ADAPT_FLAGS +'-a '+CUT_ADAPT_ADAPTER+' -o {output.fastq} {input.fastq}'
+    	'cutadapt '+CUT_ADAPT_FLAGS +' -a '+CUT_ADAPT_ADAPTER+' -o {output.fastq} {input.fastq}'
 	
 # Map
 	
@@ -39,7 +39,7 @@ rule map_reads:
     	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
      threads: 8
      shell: 
-    	 'bowtie '+BOWTIE_MAPPING_FLAGS+' -S {input.reference} {input.read} > {output}'
+    	 'bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S {input.reference} {input.read} > {output}'
     	 
 rule split_sam_file:
 	 input: 
