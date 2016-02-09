@@ -16,7 +16,7 @@ rule create_Bowtie_reference:
 	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.bt1' 
   threads : 16
   shell: 
-	  'bowtie-build '+BOWTIE_BUILD_FLAGS +' -p {threads} {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
+	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
 
 
 # remove adapterSequence from files. 
