@@ -5,13 +5,23 @@ rule all:
   input: MAIN_DIR + "multiqc_report.zip", MAIN_DIR +"RSeQC_report.pdf"
 
 
+  
+ruleorder: gatherQCdtaPE > gatherQCdtaSE 
+ruleorder: run_fastQC_SE >run_fastQC_PE
+
 #### FASTQC snakemake START #######
 # Run FASTQC on samples;
-rule run_fastQC:
+rule run_fastQC_PE:
   input: MAIN_DIR + 'reads/{sample}.{suffix}.fastq.gz'
   output: MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html"
   shell: "fastqc {input}"
 
+rule run_fastQC_SE:
+	input: MAIN_DIR + 'reads/{sample}.fastq.gz'
+	output: MAIN_DIR +"reads/{sample}_fastqc.html"
+	shell: "fastqc {input}"
+	  
+	  
 #### FASTQC snakemake STOP #######
 
 #### RSeQC snakemake START #######
@@ -68,11 +78,16 @@ rule RSEQC_read_distribution:
 ####################################GATHER ALL THE QC DATA USING multiQC######################################
 
 # Gather all the QC results using multiQC
-rule gatherQCdta:
+rule gatherQCdtaPE:
   input: STARlog =  expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), fastQC =  expand(MAIN_DIR +"reads/{sample}.{suffix}_fastqc.html", sample = SAMPLE,suffix = SUFFIX)
   output: MAIN_DIR +"multiqc_report.zip"
   shell: 'multiqc ' + MAIN_DIR
 
+# Gather all the QC results using multiQC
+rule gatherQCdtaSE:
+  input: STARlog =  expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE), fastQC =  expand(MAIN_DIR +"reads/{sample}_fastqc.html", sample = SAMPLE)
+  output: MAIN_DIR +"multiqc_report.zip"
+  shell: 'multiqc ' + MAIN_DIR
   
 rule gatherRSEQCdta:
   input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
