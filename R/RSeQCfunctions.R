@@ -1,5 +1,5 @@
 #install.packages("rmarkdown")
-#install.packages("gridExtra")
+install.packages("gridExtra")
 
 library(reshape2)
 library(ggplot2)
@@ -26,7 +26,6 @@ getAllPlots <- function(dir, metaInfo){
 
 
   # Getting TIN info
-
   TIN <- data.frame(Group= character(0) ,chrom = character(0),tx_start=integer(0) ,tx_end = integer(0), TIN = numeric(0),sampleName = character(0))
   for(i in 1: length(metaInfo$sampleName)){
     fileName = paste(metaInfo$sampleName[i],"tin.xls", sep = '.')
@@ -218,7 +217,7 @@ plotTINInfo <- function(TINinfo){
 }
 
 stat_sum_df <- function(fun, geom="crossbar",colour="black", ...) {
-  stat_summary(fun.data=fun, colour=colour, geom=geom, width = 0.90 , ...)
+  stat_summary_bin(fun.data=fun, colour=colour, geom=geom, width = 0.90 , ...)
 }
 
 

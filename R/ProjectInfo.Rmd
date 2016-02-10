@@ -1,0 +1,44 @@
+---
+title: "Project Info"
+author: "Johan"
+date: "20 Jan 2016"
+output:
+  html_document:
+    theme: united
+    toc: yes
+  pdf_document:
+    highlight: zenburn
+    toc: yes
+    
+params:
+  tableDir : !r getwd()
+  scriptDir : !r getwd()
+  parameterTableFile : 'parameter.table.Rmd'
+  metaDataTableFile : 'metadata.table.Rmd'
+  
+---
+
+
+
+
+
+# Project information
+
+For the project to work two tab delimeted files has to be filled in. The parameters for this project has been given this parameters.
+
+## Parameter table. 
+This table contains all the parameters that is used in all programs. If you would like to redo a step with new parameters please remove corresponding file and rerun the snakemake step and new files will be generated.
+
+```{r child = paste(params$tableDir, params$parameterTableFile, sep = "/")}
+```
+
+
+
+## Meta data table
+
+This table contains all samples with their corresponding reads. It also contains all the meta data for all the samples that will be used later to analyse the data. Try to add as much meta data as possible to identify reasons for differences in the data. Before running the pipelie do the following steps in the meta data table.
+
+
+```{r child = paste(params$tableDir, params$metaDataTableFile, sep = "/")}
+```
+
