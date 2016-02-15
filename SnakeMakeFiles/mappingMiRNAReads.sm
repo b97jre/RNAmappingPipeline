@@ -39,7 +39,7 @@ rule map_reads:
     	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
      threads: 8
      shell: 
-    	 'bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S {input.reference} {input.read} > {output}'
+    	 'bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs {input.read} > {output}'
     	 
 rule split_sam_file:
 	 input: 
