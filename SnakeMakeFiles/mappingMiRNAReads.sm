@@ -4,7 +4,7 @@ include:'pipeline.conf'
 # The ultimate output files we want to get
 rule all:
      input:
-         MAIN_DIR +"reads/multiqc_report.zip",
+#         MAIN_DIR +"reads/multiqc_report.zip",
          MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt',
     	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE),
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
@@ -25,6 +25,21 @@ rule create_Bowtie_reference:
 	  'bowtie-build '+ BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs > {output.logFile}' 
 
 	  
+# Run FASTQC on samples;
+rule run_fastQC:
+    input: MAIN_DIR + 'reads/{sample}.fastq.gz'
+    output: MAIN_DIR +"reads/{sample}_fastqc.html"
+    shell: "fastqc {input}"
+
+
+# Gather all the QC results using multiQC
+rule run_multiQC:
+  input: 
+	  original =  expand(MAIN_DIR +"reads/{sample}_fastqc.html", sample = SAMPLE),
+	  trimmed =  expand(MAIN_DIR +"reads/{sample}.trimmed_fastqc.html", sample = SAMPLE)
+	  untrimmed =  expand(MAIN_DIR +"reads/{sample}.untrimmed_fastqc.html", sample = SAMPLE)
+  output: MAIN_DIR + "reads/multiqc_report.zip"
+  shell: 'multiqc ' + MAIN_DIR + "reads/"
 	  
 	  
 
