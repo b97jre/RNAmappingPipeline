@@ -47,7 +47,7 @@ rule map_reads:
     	 reference = MAIN_DIR +'reference/BowtieReference/contigs.1.ebwt'
      output: 
     	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam'),
-    	 logFile = mapping/bamFiles/{sample}.bowtie1.logFile
+    	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bowtie1.logFile'
      threads: 8
      shell:
         'zcat {input.read} | bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs - > {output.samFile} 2> {output.logFile}'
