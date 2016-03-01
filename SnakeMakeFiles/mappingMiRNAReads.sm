@@ -18,11 +18,11 @@ rule create_Bowtie_reference:
   input:
 	  fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
   output:
-	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.1.ebwt'
+	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.1.ebwt',
 	  logFile = MAIN_DIR + 'reference/BowtieReference/logFile.txt'
   threads : 1
   shell:
-	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs >{output.logFile}' 
+	  'bowtie-build '+ BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs > {output.logFile}' 
 
 	  
 	  
@@ -33,8 +33,8 @@ rule trim_reads:
     input:
     	fastq = MAIN_DIR + 'reads/{sample}.fastq.gz'
     output:
-    	fastq_trimmed = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
-    	fastq_untrimmed = MAIN_DIR + 'reads/{sample}.untrimmed.fastq.gz'
+    	fastq_trimmed = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz',
+    	fastq_untrimmed = MAIN_DIR + 'reads/{sample}.untrimmed.fastq.gz',
     	logFile = MAIN_DIR + 'reads/{sample}.fastq.log.txt'
     threads: 1
     shell:
@@ -47,10 +47,10 @@ rule map_reads:
     	 reference = MAIN_DIR +'reference/BowtieReference/contigs.1.ebwt'
      output: 
     	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam'),
-    	 logFile = temp( )
+    	 logFile = mapping/bamFiles/{sample}.bowtie1.logFile
      threads: 8
      shell:
-        'zcat {input.read} | bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs - > {output.samFile} 2>'
+        'zcat {input.read} | bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs - > {output.samFile} 2> {output.logFile}'
 
 rule split_sam_file:
 	 input:
