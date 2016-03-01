@@ -19,10 +19,14 @@ rule create_Bowtie_reference:
 	  fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
   output:
 	  SAindex = MAIN_DIR + 'reference/BowtieReference/contigs.1.ebwt'
+	  logFile = MAIN_DIR + 'reference/BowtieReference/logFile.txt'
   threads : 1
   shell:
-	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs'
+	  'bowtie-build '+BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/BowtieReference/contigs >{output.logFile}' 
 
+	  
+	  
+	  
 
 # remove adapterSequence from files.
 rule trim_reads:
@@ -34,7 +38,7 @@ rule trim_reads:
     	logFile = MAIN_DIR + 'reads/{sample}.fastq.log.txt'
     threads: 1
     shell:
-    	'cutadapt '+CUT_ADAPT_FLAGS +' -a '+CUT_ADAPT_ADAPTER+' --untrimmed-output {output.fastq_untrimmed} -o {output.fastq_trimmed} {input.fastq} > '
+    	'cutadapt '+CUT_ADAPT_FLAGS +' -a '+CUT_ADAPT_ADAPTER+' --untrimmed-output {output.fastq_untrimmed} -o {output.fastq_trimmed} {input.fastq} > {output.logFile}'
 
 # Map
 rule map_reads:
