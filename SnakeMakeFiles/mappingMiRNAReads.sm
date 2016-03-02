@@ -144,14 +144,19 @@ rule merge_reads_per_gene_into_one_file:
      output:
     	 MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt'
      shell:
-    	 'java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output}'
+    	 'java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output} -recursive false'
+
 
     	 
     	 
+    	 
 rule merge_sub_reads_per_gene_into_one_file:
-    	input:
-    	    expand(MAIN_DIR + 'mapping/htseqGene/sizes/{size}/{sample}.Stranded.htseq-count.sort.txt', sample=SAMPLE, size  = LENGTHS)
-    	output:
-    	    MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt'
-    	shell:
-    	    'java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output}'
+    input:
+    	expand(MAIN_DIR + 'mapping/htseqGene/sizes/{size}/{sample}.Stranded.htseq-count.sort.txt', size = LENGTHS,sample=SAMPLE)
+    output:
+    	counttables = MAIN_DIR + 'mapping/sizes/{size}/Gene.Stranded.htseq.count.table.txt',
+    	samFolders = MAIN_DIR + 'mapping/sizes/{size}'
+	 run:
+		 for samFolder in output.samFolders:
+			 shell('java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {samFolder} -suffix .Stranded.htseq-count.sort.txt -o {samFolder}/Gene.Stranded.htseq.count.table.txt -recursive false')
+    	    
