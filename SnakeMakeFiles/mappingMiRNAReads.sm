@@ -73,7 +73,7 @@ rule split_sam_file:
 	 input:
 		 reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
 	 output:
-		 expand(MAIN_DIR + 'mapping/bamFiles/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS)
+		 expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS)
 	 run:
 		 for readfile in input.reads:
 			 shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
