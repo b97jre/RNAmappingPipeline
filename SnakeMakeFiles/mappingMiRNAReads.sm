@@ -148,15 +148,6 @@ rule merge_reads_per_gene_into_one_file:
 
     	 
     	 
-rule count_reads_per_gene_sub:
-    input:
-    	bam = MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sort.bam',
-    	gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
-    output:
-    	 MAIN_DIR + 'mapping/htseqGene/sizes/{size}/{sample}.Stranded.htseq-count.sort.txt'
-    shell:
-    	'htseq-count  '+ HTSEQ_COUNT_FLAGS +'  {input.bam} {input.gff} > {output}'
-    	 
 rule merge_sub_reads_per_gene_into_one_file:
     	input:
     	    expand(MAIN_DIR + 'mapping/htseqGene/sizes/{size}/{sample}.Stranded.htseq-count.sort.txt', sample=SAMPLE, size  = LENGTHS)
