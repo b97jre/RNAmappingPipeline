@@ -7,8 +7,8 @@ rule all:
          MAIN_DIR +"reads/multiqc_report.zip",
          MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt',
          expand(MAIN_DIR + 'mapping/sizes/{sizes}/Gene.Stranded.htseq.count.table.txt', sizes =LENGTHS),
-    	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE),
-         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
+    	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
+#         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
          
 
          
