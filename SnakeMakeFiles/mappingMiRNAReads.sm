@@ -73,7 +73,7 @@ rule split_sam_file:
 	 input:
 		 reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
 	 output:
-		 expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS)
+		 temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS))
 	 run:
 		 for readfile in input.reads:
 			 shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
@@ -82,7 +82,7 @@ rule samtools_sam2bam:
      input:
     	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
      output:
-    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.bam')
+    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
      shell:
     	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
 
@@ -90,11 +90,11 @@ rule samtools_sam2bam:
 # Sort the BAM files
 rule samtools_sort:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.temp'
      output:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
      shell:
-    	 'samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}.sort'
+    	 'samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}'
 
 
 
@@ -103,9 +103,9 @@ rule samtools_sort:
 
 rule samtools_index_hairpin:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
      output:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai'
      shell:
     	 'samtools index {input}'
 
@@ -123,40 +123,21 @@ rule biotype_and_size:
          'scripts/RNAmappingPipeline/helperScripts/get_biotype_length_distr.sh {input} reference/BowtieReference/biotypes {output} tmp/biotype_{wildcards.sample}'
 
 
-    	 
+rule merge_reads_counts_per_gene_into_one_file:
+	input:
+		bamFiles = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam', sample=SAMPLE),
+		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+	output:
+		MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.txt'
+	shell:
+		'featureCounts '+ HTSEQ_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.log'
 
 
-
-# count reads for each miRNA  and merge them
-rule count_reads_per_gene:
-     input:
-    	 bam = MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam',
-    	 gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
-     output:
-    	 MAIN_DIR + 'mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt'
-     shell:
-    	 'htseq-count  '+ HTSEQ_COUNT_FLAGS +'  {input.bam} {input.gff} > {output}'
-
-
-rule merge_reads_per_gene_into_one_file:
-     input:
-    	 expand(MAIN_DIR + 'mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt', sample=SAMPLE)
-     output:
-    	 MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt'
-     shell:
-    	 'java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output} -recursive false'
-
-
-    	 
-    	 
-    	 
 rule merge_sub_reads_per_gene_into_one_file:
-    input:
-    	expand(MAIN_DIR + 'mapping/htseqGene/sizes/{size}/{sample}.Stranded.htseq-count.sort.txt', size = LENGTHS,sample=SAMPLE)
-    output:
-    	counttables = MAIN_DIR + 'mapping/sizes/{size}/Gene.Stranded.htseq.count.table.txt',
-    	samFolders = MAIN_DIR + 'mapping/sizes/{size}'
-	 run:
-		 for samFolder in output.samFolders:
-			 shell('java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {samFolder} -suffix .Stranded.htseq-count.sort.txt -o {samFolder}/Gene.Stranded.htseq.count.table.txt -recursive false')
+	input:
+		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', size = LENGTHS,sample=SAMPLE)
+	output:
+		MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt'
+	shell:
+		'featureCounts '+ HTSEQ_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.sam > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
     	    
