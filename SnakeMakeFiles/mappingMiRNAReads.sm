@@ -5,8 +5,8 @@ include:'pipeline.conf'
 rule all:
      input:
          MAIN_DIR +"reads/multiqc_report.zip",
-         MAIN_DIR + 'mapping/Gene.Stranded.htseq.count.table.txt',
-         expand(MAIN_DIR + 'mapping/sizes/{sizes}/Gene.Stranded.htseq.count.table.txt', sizes =LENGTHS),
+         MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log',
+         MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.log'
     	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
          
