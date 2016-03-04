@@ -69,14 +69,6 @@ rule map_reads:
      shell:
         'zcat {input.read} | bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs - > {output.samFile} 2> {output.logFile}'
 
-rule split_sam_file:
-	 input:
-		 reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
-	 output:
-		 temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS))
-	 run:
-		 for readfile in input.reads:
-			 shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
 
 rule samtools_sam2bam:
      input:
@@ -109,8 +101,22 @@ rule samtools_index_hairpin:
      shell:
     	 'samtools index {input}'
 
-
-
+rule samtools_bam2sam:
+	input:
+		MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+	output:
+		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam')
+	shell:
+		'samtools view -h {input} -o {output}'
+    	 
+rule split_sam_file:
+	input:
+		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam',sample=SAMPLE)
+	output:
+		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS))
+	run:
+		for readfile in input.reads:
+			shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
 
 
 # Get biotye and size distribution of reads
