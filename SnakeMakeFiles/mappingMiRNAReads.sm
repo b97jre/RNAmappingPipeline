@@ -5,7 +5,6 @@ include:'pipeline.conf'
 rule all:
      input:
          MAIN_DIR +"reads/multiqc_report.zip",
-         MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt',
          MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.txt',
     	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
@@ -100,33 +99,6 @@ rule samtools_index_hairpin:
     	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai'
      shell:
     	 'samtools index {input}'
-
-rule samtools_bam2sam:
-	input:
-		MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
-	output:
-		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam')
-	shell:
-		'samtools view -h {input} -o {output}'
-    	 
-rule split_sam_file:
-	input:
-		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam',sample=SAMPLE)
-	output:
-		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.temp.sam', sample=SAMPLE,size=LENGTHS))
-	run:
-		for readfile in input.reads:
-			shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
-
-
-rule change_sam_fileNames:
-	input:
-		MAIN_DIR + 'mapping/bamFiles/sizes/{sample}.temp.sam' 
-	output:
-		MAIN_DIR + 'mapping/bamFiles/sizes/{sample}.sam'
-	shell:
-		'mv {input} {output}'
-
 			
 			
 # Get biotye and size distribution of reads
@@ -149,12 +121,5 @@ rule merge_reads_counts_per_gene_into_one_file:
 		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
 
 
-rule merge_sub_reads_per_gene_into_one_file:
-	input:
-		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', size = LENGTHS,sample=SAMPLE),
-		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
-	output:
-		MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt'
-	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.sam > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
-    	    
+		
+		
