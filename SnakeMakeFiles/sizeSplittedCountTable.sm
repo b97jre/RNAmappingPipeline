@@ -30,7 +30,7 @@ rule merge_sub_reads_per_gene_into_one_file:
 		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.splitted', size = LENGTHS,sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
-		MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt'
+		MAIN_DIR + 'results/Counts.splitSize.featureCount.tab.txt'
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.sam > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.splitted > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
     	    

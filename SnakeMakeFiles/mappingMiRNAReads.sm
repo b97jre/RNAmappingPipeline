@@ -4,8 +4,8 @@ include:'pipeline.conf'
 # The ultimate output files we want to get
 rule all:
      input:
-         MAIN_DIR +"reads/multiqc_report.zip",
-         MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.txt',
+         MAIN_DIR +"results/multiqc_report.zip",
+         MAIN_DIR + 'results/Counts.featureCount.tab.txt',
     	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
          
@@ -25,8 +25,8 @@ rule run_multiQC:
 	  original =  expand(MAIN_DIR +"reads/{sample}_fastqc.html", sample = SAMPLE),
 	  trimmed =  expand(MAIN_DIR +"reads/{sample}.trimmed_fastqc.html", sample = SAMPLE),
 	  untrimmed =  expand(MAIN_DIR +"reads/{sample}.untrimmed_fastqc.html", sample = SAMPLE)
-  output: MAIN_DIR + "reads/multiqc_report.zip"
-  shell: 'multiqc ' + MAIN_DIR + "reads/"
+  output: MAIN_DIR + "results/multiqc_report.zip"
+  shell: 'multiqc -o  ' + MAIN_DIR + 'results/' + MAIN_DIR + 'reads/'
 	    
          
 
@@ -116,7 +116,7 @@ rule merge_reads_counts_per_gene_into_one_file:
 		bamFiles = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam', sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
-		MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.txt'
+		MAIN_DIR + 'results/FeatureCount/Summary.count.featureCount.tab.txt'
 	shell:
 		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
 
