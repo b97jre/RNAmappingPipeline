@@ -4,7 +4,7 @@ include:'pipeline.conf'
 # The ultimate output files we want to get
 rule all:
      input:
-         MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt',
+         MAIN_DIR + 'results/Counts.splitSize.featureCount.tab.txt',
  	
 rule samtools_bam2sam:
 	input:
