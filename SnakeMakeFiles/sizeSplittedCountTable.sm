@@ -18,7 +18,7 @@ rule split_sam_file:
 	input:
 		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.split',sample=SAMPLE)
 	output:
-		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.splitted', sample=SAMPLE,size=LENGTHS))
+		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.split', sample=SAMPLE,size=LENGTHS))
 	run:
 		for readfile in input.reads:
 			shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
@@ -27,7 +27,7 @@ rule split_sam_file:
 		
 rule merge_sub_reads_per_gene_into_one_file:
 	input:
-		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.splitted', size = LENGTHS,sample=SAMPLE),
+		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.split', size = LENGTHS,sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
 		MAIN_DIR + 'results/Counts.splitSize.featureCount.tab.txt'
