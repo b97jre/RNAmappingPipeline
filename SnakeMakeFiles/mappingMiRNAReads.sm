@@ -63,7 +63,7 @@ rule map_reads:
     	 read = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz', 
     	 reference = MAIN_DIR +'reference/BowtieReference/contigs.1.ebwt'
      output: 
-    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam'),
+    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedSam'),
     	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bowtie1.logFile'
      threads: 8
      shell:
@@ -72,9 +72,9 @@ rule map_reads:
 
 rule samtools_sam2bam:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedSam'
      output:
-    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
+    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedBam')
      shell:
     	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
 
@@ -82,7 +82,7 @@ rule samtools_sam2bam:
 # Sort the BAM files
 rule samtools_sort:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.temp'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedBam'
      output:
     	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
      shell:
@@ -105,13 +105,13 @@ rule samtools_bam2sam:
 	input:
 		MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
 	output:
-		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam')
+		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
 	shell:
 		'samtools view -h {input} -o {output}'
     	 
 rule split_sam_file:
 	input:
-		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam',sample=SAMPLE)
+		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
 	output:
 		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS))
 	run:
@@ -136,15 +136,15 @@ rule merge_reads_counts_per_gene_into_one_file:
 	output:
 		MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.tab.txt'
 	shell:
-		'featureCounts '+ HTSEQ_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
 
 
 rule merge_sub_reads_per_gene_into_one_file:
 	input:
-		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', size = LENGTHS,sample=SAMPLE),
+		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.bam', size = LENGTHS,sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
 		MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt'
 	shell:
-		'featureCounts '+ HTSEQ_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.sam > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.sam > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
     	    
