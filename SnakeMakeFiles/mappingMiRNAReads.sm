@@ -63,7 +63,7 @@ rule map_reads:
     	 read = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz', 
     	 reference = MAIN_DIR +'reference/BowtieReference/contigs.1.ebwt'
      output: 
-    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedSam'),
+    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam'),
     	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bowtie1.logFile'
      threads: 8
      shell:
@@ -72,9 +72,9 @@ rule map_reads:
 
 rule samtools_sam2bam:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedSam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
      output:
-    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedBam')
+    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
      shell:
     	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
 
@@ -82,7 +82,7 @@ rule samtools_sam2bam:
 # Sort the BAM files
 rule samtools_sort:
      input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.unsortedBam'
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.temp'
      output:
     	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
      shell:
@@ -105,20 +105,30 @@ rule samtools_bam2sam:
 	input:
 		MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
 	output:
-		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
+		temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam')
 	shell:
 		'samtools view -h {input} -o {output}'
     	 
 rule split_sam_file:
 	input:
-		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sam',sample=SAMPLE)
+		reads = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.temp.sam',sample=SAMPLE)
 	output:
-		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', sample=SAMPLE,size=LENGTHS))
+		temp(expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.temp.sam', sample=SAMPLE,size=LENGTHS))
 	run:
 		for readfile in input.reads:
 			shell('java -jar /glob/johanr/bin/HTStools.jar -p sequenceHandling samSplitLengths -from {MIN_LENGTH} -to {MAX_LENGTH} -i {readfile}')
 
 
+rule change_sam_fileNames:
+	input:
+		MAIN_DIR + 'mapping/bamFiles/sizes/{sample}.temp.sam' 
+	output:
+		MAIN_DIR + 'mapping/bamFiles/sizes/{sample}.sam'
+	shell:
+		'mv {input} {output}'
+
+			
+			
 # Get biotye and size distribution of reads
 rule biotype_and_size:
      input:
@@ -141,7 +151,7 @@ rule merge_reads_counts_per_gene_into_one_file:
 
 rule merge_sub_reads_per_gene_into_one_file:
 	input:
-		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.bam', size = LENGTHS,sample=SAMPLE),
+		expand(MAIN_DIR + 'mapping/bamFiles/sizes/{size}/{sample}.sam', size = LENGTHS,sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
 		MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.tab.txt'
