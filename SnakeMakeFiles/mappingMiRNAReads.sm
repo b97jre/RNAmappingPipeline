@@ -6,7 +6,7 @@ rule all:
      input:
          MAIN_DIR +"results/multiQC_report.zip",
          MAIN_DIR + 'results/Counts.featureCount.tab.txt',
-    	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
+    	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai', sample=SAMPLE)
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
          
 
