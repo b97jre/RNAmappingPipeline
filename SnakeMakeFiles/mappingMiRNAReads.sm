@@ -26,7 +26,7 @@ rule run_multiQC:
 	  trimmed =  expand(MAIN_DIR +"reads/{sample}.trimmed_fastqc.html", sample = SAMPLE),
 	  untrimmed =  expand(MAIN_DIR +"reads/{sample}.untrimmed_fastqc.html", sample = SAMPLE)
   output: MAIN_DIR + "results/multiqc_report.zip"
-  shell: 'multiqc -o  ' + MAIN_DIR + 'results/multiQC ' + MAIN_DIR
+  shell: 'multiqc -o  ' + MAIN_DIR + 'results/multiQC ' + MAIN_DIR +"/reads"
 	    
          
 
