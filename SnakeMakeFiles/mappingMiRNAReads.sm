@@ -4,7 +4,7 @@ include:'pipeline.conf'
 # The ultimate output files we want to get
 rule all:
      input:
-         MAIN_DIR +"results/multiqc_report.zip",
+         MAIN_DIR +"results/multiQC_report.zip",
          MAIN_DIR + 'results/Counts.featureCount.tab.txt',
     	 expand(MAIN_DIR + 'mapping/bamFiles/{sample}.sort.bam.bai', sample=SAMPLE)
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
@@ -25,7 +25,7 @@ rule run_multiQC:
 	  original =  expand(MAIN_DIR +"reads/{sample}_fastqc.html", sample = SAMPLE),
 	  trimmed =  expand(MAIN_DIR +"reads/{sample}.trimmed_fastqc.html", sample = SAMPLE),
 	  untrimmed =  expand(MAIN_DIR +"reads/{sample}.untrimmed_fastqc.html", sample = SAMPLE)
-  output: MAIN_DIR + "results/multiqc_report.zip"
+  output: MAIN_DIR + "results/multiQC_report.zip"
   shell: 'multiqc -o  ' + MAIN_DIR + 'results/multiQC_report ' + MAIN_DIR +"/reads"
 	    
          
