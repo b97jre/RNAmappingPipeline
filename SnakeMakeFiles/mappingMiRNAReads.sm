@@ -116,9 +116,10 @@ rule merge_reads_counts_per_gene_into_one_file:
 		bamFiles = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam', sample=SAMPLE),
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
-		MAIN_DIR + 'results/Counts.featureCount.tab.txt'
+		countTable = MAIN_DIR + 'results/Counts.featureCount.tab.txt'
+		logFile = MAIN_DIR + 'results/Counts.featureCount.log'
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.log'
 
 
 		
