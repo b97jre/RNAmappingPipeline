@@ -1,0 +1,17 @@
+include:"pipeline.conf"
+
+
+rule all:
+	input:
+		expand("{sample}.fastq.gz", sample=SAMPLE)
+	
+	
+rule sraFile2fastqFile:
+	input: 
+		sraFile = "{sample}.sra"
+	output:
+		fastqFile = "{sample}.fastq.gz"
+	shell: 
+		"fastq-dump  --gzip {wildcards.sample}"
+		
+	
