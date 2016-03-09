@@ -2,7 +2,10 @@ include:"pipeline.conf"
 
 # The ultimate output files we want to get
 rule all:
-     input: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt", expand(MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai", sample=SAMPLE), expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE)
+     input: 
+    	 expand(MAIN_DIR + "mapping/bamFiles/{sample}.bam.bai", sample=SAMPLE), 
+    	 expand(MAIN_DIR + "mapping/logFiles/{sample}.Log.final.out", sample=SAMPLE),
+    	 MAIN_DIR + 'results/Counts.featureCount.tab.txt'
 
 #Create  STAR Reference
 rule create_STAR_reference_with_GTF:
@@ -47,35 +50,33 @@ rule softLink_LogFiles:
     	 
 rule samtools_sam2bam_hairpin:
      input: MAIN_DIR + "mapping/bamFiles/{sample}.sam"
-     output: temp(MAIN_DIR + "mapping/bamFiles/{sample}.bam")
+     output: temp(MAIN_DIR + "mapping/bamFiles/{sample}.temp")
      shell: "samtools view "+ SAMTOOLS_VIEW_FLAGS +"  {input} -o {output}"
 
 # Sort the BAM files
 rule samtools_sort_hairpin:
-     input: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
-     output: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
-     shell: "samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}.sort"
+     input: MAIN_DIR + "mapping/bamFiles/{sample}.temp"
+     output: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
+     shell: "samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}"
 
 
 # Index the sorted BAM files
 
 rule samtools_index_hairpin:
-     input: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam"
-     output: MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam.bai"
+     input: MAIN_DIR + "mapping/bamFiles/{sample}.bam"
+     output: MAIN_DIR + "mapping/bamFiles/{sample}.bam.bai"
      shell: "samtools index {input}"
 
-# Estimate counts
-
-# count reads for each miRNA  and merge them
-rule count_reads_per_gene:
-     input: bam = MAIN_DIR + "mapping/bamFiles/{sample}.sort.bam", gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
-     output: MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt"
-     shell: "htseq-count  "+ HTSEQ_COUNT_FLAGS +"  {input.bam} {input.gff} > {output}"
+# Get counts 
 
 
+rule merge_reads_counts_per_gene_into_one_file:
+	input:
+		bamFiles = expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam', sample=SAMPLE),
+		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
+	output:
+		MAIN_DIR + 'results/Counts.featureCount.tab.txt'
+	shell:
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
 
-rule merge_reads_per_gene_into_one_file:
-     input:  expand(MAIN_DIR + "mapping/htseqGene/{sample}.Stranded.htseq-count.sort.txt", sample=SAMPLE)
-     output: MAIN_DIR + "mapping/Gene.Stranded.htseq.count.table.txt"
-     shell: "java -jar /glob/johanr/bin/FileParser.jar -program HTSEQCOUNT -i {MAIN_DIR}/mapping/htseqGene -suffix .Stranded.htseq-count.sort.txt -o {output}"
 

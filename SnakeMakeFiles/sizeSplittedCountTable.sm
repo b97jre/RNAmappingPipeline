@@ -32,5 +32,5 @@ rule merge_sub_reads_per_gene_into_one_file:
 	output:
 		MAIN_DIR + 'results/Counts.splitSize.featureCount.tab.txt'
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.split > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/sizes/*/*.split > '+MAIN_DIR + 'mapping/FeatureCount/Sizes.count.featureCount.l	og'
     	    
