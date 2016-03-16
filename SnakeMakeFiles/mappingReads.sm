@@ -77,6 +77,6 @@ rule merge_reads_counts_per_gene_into_one_file:
 	output:
 		MAIN_DIR + 'results/Counts.featureCount.tab.txt'
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'mapping/FeatureCount/Summary.count.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.tab.log'
 
 
