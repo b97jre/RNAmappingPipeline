@@ -12,7 +12,7 @@ rule create_STAR_reference_with_GTF:
   input: fasta = MAIN_DIR + 'reference/fasta/contigs.fa', gtf = MAIN_DIR + 'reference/annotation/contigs.gtf'
   output: SAindex =  MAIN_DIR +'reference/STARreference/SAindex' 
   threads : 16
-  shell: "STAR "+STAR_BUILD_FLAGS +" --runThreadN 16 --runMode genomeGenerate --genomeDir "+MAIN_DIR +"reference/STARreference --genomeFastaFiles {input.fasta} --sjdbGTFfile {input.gtf} --sjdbOverhang "+str(READLENGTH -1)
+  shell: "STAR "+STAR_BUILD_FLAGS +" --runThreadN {threads} --runMode genomeGenerate --genomeDir "+MAIN_DIR +"reference/STARreference --genomeFastaFiles {input.fasta} --sjdbGTFfile {input.gtf} --sjdbOverhang "+str(READLENGTH -1)
 
 #rule create_STAR_reference_without_annotation:
 #  input: fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
@@ -26,14 +26,14 @@ rule map_paired_end_reads:
      input: forward = MAIN_DIR + "reads/{sample}.1.fastq.gz", reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", reference = MAIN_DIR +"reference/STARreference/SAindex"
      output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out", SampleDir =  MAIN_DIR + "mapping/{sample}/"
      threads: 8
-     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir "+MAIN_DIR +"reference/STARreference --readFilesIn {input.forward} {input.reverse} --runThreadN 8 --readFilesCommand zcat  --outFileNamePrefix {output.SampleDir}"
+     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir "+MAIN_DIR +"reference/STARreference --readFilesIn {input.forward} {input.reverse} --runThreadN {threads} --readFilesCommand zcat  --outFileNamePrefix {output.SampleDir}"
 
      
 rule map_single_end_reads:
      input: read = MAIN_DIR + "reads/{sample}.fastq.gz",  reference = MAIN_DIR +"reference/STARreference/SAindex"
      output: samFile = MAIN_DIR + "mapping/{sample}/Aligned.out.sam", LogFile = MAIN_DIR + "mapping/{sample}/Log.final.out", SampleDir =  MAIN_DIR + "mapping/{sample}/"
      threads: 8
-     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir "+MAIN_DIR +"reference/STARreference --readFilesIn {input.read} --runThreadN 8 --readFilesCommand zcat  --outFileNamePrefix {output.SampleDir}"
+     shell: "STAR "+STAR_MAP_FLAGS +" --genomeDir "+MAIN_DIR +"reference/STARreference --readFilesIn {input.read} --runThreadN {threads} --readFilesCommand zcat  --outFileNamePrefix {output.SampleDir}"
      
      
 rule softLink_SamFiles:
@@ -76,7 +76,8 @@ rule merge_reads_counts_per_gene_into_one_file:
 		gff = MAIN_DIR + 'reference/annotation/contigs.gtf'
 	output:
 		MAIN_DIR + 'results/Counts.featureCount.tab.txt'
+	threads: 8
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.tab.log 2>'+MAIN_DIR + 'results/Counts.featureCount.tab.setup'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +'-T {threads} -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.tab.log 2>'+MAIN_DIR + 'results/Counts.featureCount.tab.setup'
 
 
