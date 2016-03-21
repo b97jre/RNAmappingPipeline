@@ -1,9 +1,6 @@
-#install.packages("rmarkdown")
-install.packages("gridExtra")
 
 library(reshape2)
 library(ggplot2)
-library(gridExtra)
 
 
 LinetypeValues = rep(c(rep("solid", 9), rep("dashed", 9),rep("dotted", 9), rep("dotdash", 9),rep("longdash", 9), rep("twodash", 9)), 40)
@@ -13,7 +10,9 @@ plotValues = data.frame(linetype = LinetypeValues, color = colorValues)
 
 
 ##################################################################################main function
-getAllPlots <- function(dir, metaInfo){
+
+
+getAllPlots <- function(RSeQCdir, metaInfo){
 
   # Getting read distribution info
   Groups = c("TES_down_10kb","TES_down_5kb","TES_down_1kb","TSS_up_10kb","TSS_up_5kb","TSS_up_1kb","Introns","3'UTR_Exons","5'UTR_Exons","CDS_Exons")
@@ -85,7 +84,7 @@ getAllPlots <- function(dir, metaInfo){
   junctionSaturationPlots = list(junctionSaturationPlot = junctionSaturationPlot, junctionSaturationPlot2 = junctionSaturationPlot2)
 
   Allplots = list(list(TPKMplot), list(TINplot), list(ClippingInfoPlot) ,
-                  list(ClippingInfoPlot2), list(InnerDistancePlot),
+                  lisjat(ClippingInfoPlot2), list(InnerDistancePlot),
                   list(InnerDistancePlot2),list(GBCplot), list(GBCplot2),
                   list(junctionSaturationPlot) , list(junctionSaturationPlot2))
 
@@ -93,6 +92,91 @@ getAllPlots <- function(dir, metaInfo){
 
 }
 
+getTPKMPlots <- function(RSeQCdir, metaInfo){
+
+  # Getting read distribution info
+  Groups = c("TES_down_10kb","TES_down_5kb","TES_down_1kb","TSS_up_10kb","TSS_up_5kb","TSS_up_1kb","Introns","3'UTR_Exons","5'UTR_Exons","CDS_Exons")
+  RD <- data.frame(Group= factor(levels = Groups ) ,Total_bases = integer(0),Tag_count=integer(0) ,Tags_Kb = numeric(0), TPKM = numeric(0),sampleName = character(0) )
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"read_distribution.txt", sep = '.')
+    RD <-rbind(RD,read_distributionFile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+  }
+
+
+  TPKMplot <- plotTPKMInfo(tagDistribution =  RD)
+}
+
+
+
+getTINPlots <- function(RSeQCdir, metaInfo){
+
+  # Getting TIN info
+  TIN <- data.frame(Group= character(0) ,chrom = character(0),tx_start=integer(0) ,tx_end = integer(0), TIN = numeric(0),sampleName = character(0))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"tin.xls", sep = '.')
+    TIN <-rbind(TIN,readTINFile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+  }
+
+    TINplot <- plotTINInfo(TIN)
+}
+
+
+getClippingProfilePlots <- function(RSeQCdir, metaInfo){
+ CP <- data.frame(position = integer(0), R1  = integer(0), R1percentage = numeric(0) ,R2 = integer(0), R2percentage = numeric(0),sampleName = character(0))
+ for(i in 1: length(metaInfo$sampleName)){
+   fileName = paste(metaInfo$sampleName[i],"clipping_profile.r", sep = '.')
+   CP <-rbind(CP,readClippingProfile(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+ }
+ ClippingInfoPlot <- plotClippingInfo(CP)
+ ClippingInfoPlot2 <- plotClippingInfo2(CP)
+ ClippingInfoPlots = list(ClippingInfoPlot = ClippingInfoPlot,ClippingInfoPlot2 = ClippingInfoPlot2)
+}
+
+
+
+
+getInnerDistancePlot<- function(RSeQCdir, metaInfo){
+  ID <- data.frame(from = integer(0), position  = integer(0),count = integer(0), Percent = numeric(0),sampleName = character(0))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"inner_distance_freq.txt", sep = '.')
+
+    ID <-rbind(ID,readInnerDistance(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+  }
+  InnerDistancePlot <- plotInnerDistance(ID)
+  InnerDistancePlot2 <- plotInnerDistance2(ID)
+
+  InnerDistancePlots1 = list(InnerDistancePlot = InnerDistancePlot)
+  InnerDistancePlots2 = list(InnerDistancePlot2 = InnerDistancePlot2)
+}
+
+getGeneBodyCoveragePlots<- function(RSeQCdir, metaInfo){
+
+  GBC <- data.frame(position  = integer(0), count = integer(0), Percent = numeric(0),sampleName = character(0))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"geneBodyCoverage.txt", sep = '.')
+    GBC <-rbind(GBC,readGeneBodyCoverage(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+  }
+
+  GBCplot <- plotGeneBodyCoverage(GBC)
+  GBCplot2 <- plotGeneBodyCoverage2(GBC)
+  GBCplots = list(GBCplot = GBCplot, GBCplot2 = GBCplot2)
+}
+
+
+
+getJunctionSaturationPlots<- function(RSeQCdir, metaInfo){
+
+  JS <- data.frame(position  = integer(0), knownJunctions = integer(0), AllJunctions = integer(0), NovelJunctions = integer(0), knownJuncionsFraction = numeric(0),NovelJunctionsFraction = numeric(0),sampleName = character(0))
+  for(i in 1: length(metaInfo$sampleName)){
+    fileName = paste(metaInfo$sampleName[i],"junctionSaturation_plot.r", sep = '.')
+    JS <-rbind(JS,read_junctionSaturation(RSeQCdir,fileName,sampleName = metaInfo$sampleName[i]))
+  }
+
+  junctionSaturationPlot <- plotjunctionSaturation(JS)
+  junctionSaturationPlot2 <- plotjunctionSaturation2(JS)
+  junctionSaturationPlots = list(junctionSaturationPlot = junctionSaturationPlot, junctionSaturationPlot2 = junctionSaturationPlot2)
+
+}
 
 
 
@@ -199,7 +283,7 @@ plotTPKMInfo <- function(tagDistribution){
   p <- ggplot(tagDistribution, aes(x=factor(sampleName),y = TPKM, fill=factor(Group))) +
     geom_bar(position="fill",stat="identity") +
     labs(title = "Tags Per 1000 bases per Million tags (TPKM)" , x = "Sample", y = "Fraction of TPKM") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))
+    theme(axis.text.x = element_text(angle = 90, hjust = 1))+ coord_flip()
 
   return (p)
 }
@@ -212,7 +296,7 @@ plotTINInfo <- function(TINinfo){
   g <- ggplot(plotTINInfoData, aes(as.factor(sampleName),TIN ,colour = sampleName))+
     geom_boxplot()+
     labs(title = "Distribution of TIN values across samples" , x = "Sample", y = "TIN value") +
-    theme(axis.text.x = element_text(angle = 90, hjust = 1))+ coord_flip()
+    theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+ coord_flip()
 
 }
 
@@ -230,13 +314,13 @@ plotClippingInfo <- function(clippingInfo){
   nrOfSamples = length(unique(clippingInfoPlot$sampleName))
 
   plot <- ggplot(clippingInfoPlot, aes(x = position, y = value))
-  plot = plot +  geom_line(aes(colour = sampleName))
+  plot = plot +  geom_line(aes(colour = sampleName))+ theme(legend.position="left" ) + guides(colour = guide_legend(reverse=TRUE))
   # To complicated and did not work properly maybe use later
   #  plot = plot +  geom_line(aes(colour = sampleName, linetype = sampleName))
   #  plot = plot + scale_linetype_manual(values = LinetypeValues[1:nrOfSamples])
   #  plot = plot + scale_color_manual(values = colorValues[1:nrOfSamples])
 
-  plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
+  #plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
   plot = plot + labs(title = "Distribution of clipped reads across samples" , x = "Position on read", y = "Fraction clipped reads") +facet_grid(variable ~ . )
   return (plot)
 }
@@ -248,8 +332,20 @@ plotClippingInfo2 <- function(clippingInfo){
   nrOfSamples = length(unique(clippingInfoPlot$sampleName))
 
   plot <- ggplot(clippingInfoPlot, aes(x = position, fill = value, y = sampleName))
-  plot = plot + geom_tile()+ scale_fill_gradient(low="yellow", high="red")
+  plot = plot + geom_tile()+ scale_fill_gradient(low="white", high="blue")
   plot = plot + labs(title = "Distribution of clipped reads across samples" , x = "Position on read", y = "Sample") +facet_grid(variable ~ . )
+  return (plot)
+}
+
+plotClippingInfo2Single <- function(clippingInfo){
+  clippingInfoPlot = clippingInfo[, c("position","sampleName","R1percentage")]
+  colnames(clippingInfoPlot) <-c("position","sampleName","Forward read")
+  clippingInfoPlot = melt(clippingInfoPlot,id.vars = c("position","sampleName"))
+  nrOfSamples = length(unique(clippingInfoPlot$sampleName))
+
+  plot <- ggplot(clippingInfoPlot, aes(x = position, fill = value, y = sampleName))
+  plot = plot + geom_tile()+ scale_fill_gradient(low="white", high="blue")
+  plot = plot + labs(title = "Distribution of clipped reads across samples" , x = "Position on read", y = "Sample")
   return (plot)
 }
 
@@ -259,14 +355,13 @@ plotClippingInfo2 <- function(clippingInfo){
 
 plotInnerDistance <- function(inner.distance){
   plot = ggplot(inner.distance, aes(x = position, y = Percent, colour = sampleName))+geom_line()
-  plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
-  plot = plot + labs(title = "Distance between reads" , x = "Distance", y ="Fraction")
+  plot = plot + labs(title = "Distance between reads" , x = "Distance", y ="Fraction")+ theme(legend.position="left" ) + guides(colour = guide_legend(reverse=TRUE))
   return (plot)
 }
 
 plotInnerDistance2 <- function(inner.distance){
   plot = ggplot(inner.distance, aes(x = position, fill = Percent, y = sampleName))
-  plot = plot + geom_tile()+ scale_fill_gradient(low="yellow", high="red")
+  plot = plot + geom_tile()+ scale_fill_gradient(low="white", high="blue")
   plot = plot + labs(title = "Distance between reads" , x = "Distance", y ="Sample")
 
   return (plot)
@@ -276,16 +371,16 @@ plotInnerDistance2 <- function(inner.distance){
 
 
 plotGeneBodyCoverage <- function(GBCinfo){
-  plot = ggplot(GBCinfo, aes(x = position, y = Percent, colour = sampleName ))
-  plot =  plot  +geom_line()
-  plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
+  plot = ggplot(GBCinfo, aes(x = position, y = Percent, colour = sampleName))
+  plot =  plot  +geom_line() + theme(legend.position="left" ) + guides(colour = guide_legend(reverse=TRUE))
+  #plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
   plot = plot + labs(title = "Gene body coverage" , x = "5' -> 3'", y ="Relative coverage")
   return (plot)
 }
 
 plotGeneBodyCoverage2 <- function(GBCinfo){
   plot = ggplot(GBCinfo, aes(x = position, y = sampleName, fill = Percent))
-  plot = plot + geom_tile()+ scale_fill_gradient(low="yellow", high="red")
+  plot = plot + geom_tile() + scale_fill_gradient(low="white", high="blue")
   plot = plot + labs(title = "Gene body coverage" , x = "5' -> 3'", y ="Sample name")
 
   return (plot)
@@ -299,8 +394,8 @@ plotjunctionSaturation <- function(junctionSaturation){
   junctionSaturationPlot = melt(junctionSaturationPlot,id.vars = c("PercentOfReads","sampleName"))
 
   plot <- ggplot(junctionSaturationPlot, aes(x = PercentOfReads, y = value))
-  plot = plot +  geom_line(aes(colour = sampleName))
-  plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
+  plot = plot +  geom_line(aes(colour = sampleName)) + theme(legend.position="left" ) + guides(colour = guide_legend(reverse=TRUE))
+  #plot =  plot + stat_sum_df("mean_cl_normal", geom = "smooth")
   plot = plot + labs(title = "Distribution of known junctions depending on percent of reads used" , x = "Percent of reads", y = "Fraction") +facet_grid(variable ~ . )
   return (plot)
 }
@@ -311,7 +406,7 @@ plotjunctionSaturation2 <- function(junctionSaturation){
   junctionSaturationPlot = melt(junctionSaturationPlot,id.vars = c("PercentOfReads","sampleName"))
 
   plot <- ggplot(junctionSaturationPlot, aes(x = PercentOfReads, y = sampleName, fill = value))
-  plot = plot + geom_tile()+ scale_fill_gradient(low="yellow", high="red")
+  plot = plot + geom_tile()+ scale_fill_gradient(low="white", high="blue")
   plot = plot + labs(title = "Distribution of known junctions depending on percent of reads used" , x = "Percent of reads", y = "Fraction")
 
   return (plot)

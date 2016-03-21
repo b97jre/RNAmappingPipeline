@@ -1,123 +1,147 @@
 ---
-title: "RNA-seq pipeline report"
+title: "Sample QC analysis"
 author: "Johan"
-date: "11 Dec 2015"
+date: "19 Feb 2016"
 output: html_document
 params:
-  path:/path/to/folders/
-  
+  RfunctionsDirectory: "~/git/GBPanalysis/R"
+  workingDirectory: "~/Vetenskap/Data/Wierup/Project_GBP_Pig/newRun"
+  resultsDir: "~/Vetenskap/Data/Wierup/Project_GBP_Pig/newRun/RSeQC"
+  metaDataTableTxt: "metaData.table.txt"
+  sampleNameColumn: "sampleName" 
+  metaDataTableRmd : 'metadata.table.Rmd'
+
 ---
 
 
-# RNA-seq pipeline report 
-
-## Basic setup
-This document will be created as last step of the pipeline that is run for mapping RNA reads to a reference. The programs and there versions can be found in the file Programs and setting that is found in the same folder as the working directory of this file. to generate this file  
+This relies on the data output that is being produced from RSeQC and ends up in one folder. All variables that this document is dependent on can be changed  either in the header of by calling the document including parameters. 
 
 
-
-
-## Pipeline run
-
-
-### Pre-pipeline run
-To run the program you will have to do some manual steps before.
-
-    1.  Creating a table that contains all the reads that will be used in the analysis. (This can be done by using the SnakemakeSetup.jar package)  
-    2.  Fill in the table that contains all the metadata for each sample and the sampleNames. The more things that will be included in this the better. This table is highly dependent on the study. (This step is done manually)   
-    3.  Create a table that contains all the information regarding where the files are and the paths to the programs. If the programs are in the path only the program name can be used as the path. (This step is done manually). A default tab-delimeted sheet is available at github.com/../..
-    4. Setup the path structure so that the snakemake file can be used. (This can be done by using the SnakemakeSetup.jar file)  
-    5. Run the snakemake file that will run the pipleine that will map the reads and count the number of reads that map to each gene.  
-
-##### Creating a reads table location  
-  The important thing here is to in the end have a tab delimeted table with all reads that you want to include in your final analysis. This can be done manually by just writing it. A more efficient way to start it is to use the java package that you can find here. Download it and install it. If you are working on __UPPMAX__ it is already installed on __/proj/b2013006/sw/modules/SnakemakeSetup.jar__ . To start the search you type the following.
-
-    java -jar /proj/b2013006/sw/modules/SnakemakeSetup.jar -p findReads -i <localPath> -suffix <endOfFile> -sep <endOfForwardFile endOfReverseFile>
-     
-where: 
-
-    * -p findReads tells the program to find reads and report them  
-    * -i  <folderName> gives the folder where the program will find all the reads that ends with the suffix specified below  
-    * -suffix <endOfreadFileName> will determine will files that will be reported     
-    * -sep <endOfForwardFile endOfReverseFile> will tell you what will be reported  
-     
-     
-The output in the files will look like this. 
-
-**readTableFile**
-
-
-|SampleName|forward|reverse|
-|----------|-------|-----|
-|SampleName1     |/path/to/forwardFile1 |/path/to/reverseFile1|
-|SampleName2     |/path/to/forwardFile2 |/path/to/reverseFile2|
-|SampleName3     |/path/to/forwardFile3 |/path/to/reverseFile3|
-
-
-**metadataTableFile**
-
-|SampleName     |Name  |Prep_date|Seq_Date|Seq_type|Sep1|Sep2|Sep3|	
-|--|--|--|--|--|--|--|--|--|--|--|--|	
-|SampleName1     |SN1 |1|1|Ilumina|1|1|1|
-|SampleName3     |SN2 |1|2|Solid|2|2|1|
-|SampleName3     |SN2 |2|3|PacBio|3|1|2|
-
-
-#### Filling the previously generated metadataTableFile. 
-
-This step is important for making sense of the data and should be filled in by the user before the analysis start.The Sep columns should be filled in with meta data that is different between the samples. Things that often is used is __[sick | healthy]__ ,__[male | female]__, __[weight]__,__[Individual]__, __[TissueType]__. This list can be filled in with as many columns as the user wants. It is quite important that it is filled in as much as possible.   This can be done in excel but the end result should be a tab delimeted file (__UNIX__ formated).  
-
-**Example with three samples from two different tissues from three persons with the same mother but different fathers**
-
-|SampleName|Name|Prep_date|Seq_Date|Seq_type|Gender|Individual|Mother|Father|Operation_date|Tissue|weight|	
-|----------|----|---------|--------|--------|------|----------|------|------|--------------|------|------|	
-|SampleName1 |SN1 |1       |1      |Ilumina |Male |1| 1|1|1|Tissue1 |86.7 |
-|SampleName2 |SN2 |1       |1      |Ilumina |Male |2| 1|2|2|Tissue1 |88.7 |
-|SampleName3 |SN3 |1       |1      |Ilumina |Female |3| 1|1|3|Tissue1 |74.7 |
-|SampleName4 |SN1 |1       |1      |Ilumina |Male |1| 1|1|1|Tissue2 |86.7 |
-|SampleName5 |SN2 |1       |1      |Ilumina |Male |2| 1|2|2|Tissue2 |88.7 |
-|SampleName6 |SN3 |1       |1      |Ilumina |Female |3| 1|1|3|Tissue2 |74.7 |
-
-
-
-
-
-#### Filling the previously generated metadataTableFile. 
-
-
+#Sample included in the results
 
 
 ```{r, echo=FALSE}
 
+```{r child = paste(params$workingDirectory, params$metaDataTableRmd, sep = "/")}
 ```
 
 
-
-#First plot 
-
-```{r, echo=FALSE}
-
-setwd('/Users/johanreimegard/Vetenskap/Data/Wierup/Project_GBP_Pig')
-RSeQCdir = 'RSeQC'
-metaDataFile = 'MetaData.tab.table.txt'
-MultiQCdir = 'MultiQC'
-junctionSaturationPlot
-```
+# Distribution of reads that over the different samples.
 
 
 ```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+plot = getTPKMPlots(resultsDir,metaData)
+plot
+```
+
+#TIN values for the different samples
+
+```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+plot =getTINPlots(resultsDir,metaData)
+
+plot
+```
+
+
+#Gene body coverage for the different samples
+
+```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+plot =getGeneBodyCoveragePlots(resultsDir,metaData)
+
+
+plot[[1]]
+
+plot[[2]]
+```
+
+
+# Fraction of known junctions of all bases on reads used 
+
+
+```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+plot =getJunctionSaturationPlots(resultsDir,metaData)
+
+
+plot[[1]]
+
+plot[[2]]
+```
+
+
+# Clipping profile to identify where the soft clipping occurs.
+```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+plot =getClippingProfilePlots(resultsDir,metaData)
+
+
+plot[[1]]
+
+plot[[2]]
+```
+
+# Inner distance plot
+
+```{r, echo=FALSE}
+RfunctionsDirectory = params$RfunctionsDirectory
+RseqFunctionsFile = paste(RfunctionsDirectory,"RSeQCfunctions.R", sep="/")
+source(RseqFunctionsFile)
+workingDirectory = params$workingDirectory
+resultsDir = params$resultsDir
+metaDataTableFile = params$metaDataTableTxt
+
+metaData = read.table(paste(workingDirectory,metaDataTableFile,sep= "/"), sep = "\t", header = TRUE,comment.char="");
+if(any(colnames(metaData) == "Type")){
+  if(any(metaData$Type=="PE")){
+    plot =getClippingProfilePlots(resultsDir,metaData)
+
+
+    plot[[1]]
+
+    plot[[2]]
+  }
+}else{
+  print("No info about paired end reads")
+}
 
 ```
 
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
-
-```{r}
-summary(cars)
-```
-
-You can also embed plots, for example:
-
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
