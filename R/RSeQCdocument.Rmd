@@ -4,9 +4,9 @@ author: "Johan"
 date: "19 Feb 2016"
 output: html_document
 params:
-  RfunctionsDirectory: "~/git/GBPanalysis/R"
-  workingDirectory: "~/Vetenskap/Data/Wierup/Project_GBP_Pig/newRun"
-  resultsDir: "~/Vetenskap/Data/Wierup/Project_GBP_Pig/newRun/RSeQC"
+  RfunctionsDirectory: "/glob/johanr/scripts/RNAmappingPipeline/R"
+  workingDirectory: "."
+  resultsDir: "RSeQC"
   metaDataTableTxt: "metaData.table.txt"
   sampleNameColumn: "sampleName" 
   metaDataTableRmd : 'metadata.table.Rmd'
