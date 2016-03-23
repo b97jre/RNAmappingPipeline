@@ -1,7 +1,7 @@
 printProjectInfo <- function(tableDir = getwd(),
                              scriptDir = paste(getwd(),"scripts/RNAmappingPipeline/Rscripts", sep = "/"),
                              projectInfoRmdFile = paste(scriptDir,'ProjectInfo.Rmd', sep = "/"),
-                             parameterTableFile = 'parameter.table.Rmd',
+                             parameterTableFile = 'parameters.table.Rmd',
                              metaDataTableFile = 'metadata.table.Rmd'){
   print(tableDir)
 

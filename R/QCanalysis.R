@@ -1,5 +1,6 @@
+source("scripts/")
 RSeQCdir = 'RSeQC'
-metaInfo <- read.table("metaData.table.txt", sep = "\t", header = TRUE);
+metaInfo <- read.table("metaData.table.txt", sep = "\t", header = TRUE,comment.char="");
 
 getAllPlots(dir = RSeQCdir,metaInfo)
 
