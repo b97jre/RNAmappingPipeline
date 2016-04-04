@@ -43,29 +43,29 @@ rule RSEQC_TIN_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: exelFile = MAIN_DIR + "RSeQC/{sample}.tin.xls" , summaryFile = MAIN_DIR + "RSeQC/{sample}.tin.summary.txt"
   run:
-    shell('tin.py -i {input.bam} -r {input.bed}')
+    shell('tin.py -i {input.bam} -r {input.bed}  > RSeQC/{wildcards.sample}.TIN.log')
     shell('mv {wildcards.sample}.tin.xls {output.exelFile}')
     shell('mv {wildcards.sample}.summary.txt {output.summaryFile}')
 
 rule RSEQC_clipping_profile_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam"
   output: gbc = MAIN_DIR + "RSeQC/{sample}.clipping_profile.r"
-  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s "'+LAYOUT+'"'
+  shell: 'clipping_profile.py -i {input.bam} -o RSeQC/{wildcards.sample} -s "'+LAYOUT+'" > RSeQC/{wildcards.sample}.clipping_profile.log'
 
 rule RSEQC_inner_distance_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt"
-  shell: 'inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}'
+  shell: 'inner_distance.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample} > RSeQC/{wildcards.sample}.inner_distance.log'
 
 rule RSEQC_junction_saturation_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r"
-  shell: 'junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample}'
+  shell: 'junction_saturation.py -r {input.bed} -i {input.bam} -o RSeQC/{wildcards.sample} > RSeQC/{wildcards.sample}.junction_saturation.log'
 
 rule RSEQC_geneBody_coverage_single_bam:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
   output: gbc = MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r"
-  shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample}'
+  shell: 'geneBody_coverage.py -r {input.bed} -i {input.bam}  -o RSeQC/{wildcards.sample} > RSeQC/{wildcards.sample}.geneBodyCoverage.log'
 
 rule RSEQC_read_distribution:
   input:  bam = MAIN_DIR + "mapping/bamFiles/{sample}.bam" ,  bed = MAIN_DIR + 'reference/annotation/contigs.bed'
