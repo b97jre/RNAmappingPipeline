@@ -298,7 +298,20 @@ plotTINInfo <- function(TINinfo){
     labs(title = "Distribution of TIN values across samples" , x = "Sample", y = "TIN value") +
     theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+ coord_flip()
 
+
 }
+
+plotTINInfo <- function(TINinfo){
+  plotTINInfoData = TINinfo[TINinfo$TIN >1, ]
+  g <- ggplot(plotTINInfoData, aes(as.factor(sampleName),TIN ,colour = sampleName))+
+    geom_boxplot()+
+    labs(title = "Distribution of TIN values across samples" , x = "Sample", y = "TIN value") +
+    theme(axis.text.x = element_text(angle = 90, hjust = 1),legend.position="none")+ coord_flip()
+
+
+}
+
+
 
 stat_sum_df <- function(fun, geom="crossbar",colour="black", ...) {
   stat_summary_bin(fun.data=fun, colour=colour, geom=geom, width = 0.90 , ...)

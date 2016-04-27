@@ -1,0 +1,59 @@
+---
+title: "SetupInfo"
+author: "Johan"
+date: "20 Jan 2016"
+output: html_document
+---
+# RNA-seq pipeline info
+
+This is the instruction for how to  run this RNAseq pipeline on your data. 
+It requires some manual steps which will be described below. The pipeline is divided in two parts. The first will map all the reads to a reference and then create a table with all the count reads in one table.The second will generate a QC report for your data and generate a html file and a pdf file of all the quality measurments. All paths written in this report is done for running on uppmax but all the programs and files can be found on [github](https://github.com/b97jre/RNAmappingPipeline)
+
+
+# RNA-seq pipeline setup
+## Step by step procedure how to setup and start the pipeline
+To run the pipeline you will have to fill in some information regarding your project. This is done in some steps.
+
+1.  Create folder where you want to run your pipline
+      + `mkdir workFolder`
+2.  Go into folder and initiate the setup
+      + `cd workFolder`
+      + `java -jar /glob/johanr/bin/RNAseqSetup.jar`
+
+3.  The program will now look for two files. The first is named `parameters.table.txt` and will contain information on different files and parameters that will be used during the mapping procedure. The second is named `metaData.table.tab.txt` and contains information on all the samples that will be included in the mapping and also additional information regarding the samples.  Since none of the files have been generated the first file `parameters.table.txt` will be generated. More information on how to fill in the table se below
+4.  Once the `parameters.table.txt` is correctly filled in restart the setup
+      + `java -jar /glob/johanr/bin/RNAseqSetup.jar`
+5.   The information given in `parameters.table.txt` regarding the samples will be used to identify all the reads that will be used in the mapping pipeline and written down in the `metaData.table.tab.txt`. Make sure you change the metaData.table so that the sampleNames make sense and that as much of the meta data is filled in. More information on how to fill in the `metaData.table.tab.txt` see below
+6.  Once the `metaData.table.tab.txt` is correctly filled in restart the setup
+      + `java -jar /glob/johanr/bin/RNAseqSetup.jar` 
+7.  This will now create a correct directory structure and create soft links for all the files that will be used in the analysis. After that you will have the choice to either start the pipeline, write a report with all the setupinformation or abort the setup
+      + `y`  will start the pipeline and write a report with all parameters and settings and all the samples with its metadata.
+      + `n`  will write a report with all parameters and settings and all the samples with its metadata.  
+      + `x` will quit the setup. 
+
+### Code example of setup
+
+The most importan thing during setup is to actually change the values in the two files `parameters.table.txt` and `metaData.table.tab.txt` 
+
+    #create work directory
+    mkdir workdir
+
+    # go into work directory
+    cd workdir 
+
+    # Initiate setup
+    java -jar /glob/johanr/bin/RNAseqSetup.jar
+
+    #Change in parameters.table.txt
+    vim parameters.table.txt
+
+    # Use info in  parameters.table.txt find all reads associated to generate the correct metadata info
+    java -jar /glob/johanr/bin/RNAseqSetup.jar
+    
+    #Change in sampleNames in metaData.table.tab.txt and add metadata info on the samples
+    vim metaData.table.tab.txt
+
+    #Start the pipeline
+    java -jar /glob/johanr/bin/RNAseqSetup.jar
+
+

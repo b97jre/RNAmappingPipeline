@@ -1,0 +1,37 @@
+| Key | Value | Comment |
+|-------|-------|-------|
+| #Project info  |  | |
+| ProjectWD | /Users/johanreimegard/Vetenskap/Data/Wierup/testRun | Give the full path to were the project should be initiated |
+| metadataTable | /Users/johanreimegard/Vetenskap/Data/Wierup/testRun/metaData.table.tab.txt | The location of the meta data table |
+| projectID | 20160115 | A unique project ID where the results will end up |
+| location | UPPMAX | Where the project is run. If 'UPPMAX' paths to scripts will be set and sbatch scripts will be created. UPPMAX is default |
+| nrOfCores | 16 | Number of cores used. Default is 16 |
+| #Reads info  |  | |
+| readsDir | /Users/johanreimegard/Vetenskap/Data/Wierup/reads | Give the full path to were all the reads are located |
+| type | PE | PE is paired end reads SE is single end reads. If SE info will be ignored |
+| sep | 1.fastq.gz 2.fastq.gz | the suffix of the read pairs, eg 1.fastq.gz 2.fastq.gz |
+| Chemistry | Illumina | Kind of sequencing method. Illumina is default |
+| readLength | 100 | Length of reads. 100 is default |
+| readSuffix | fastq.gz | End of reads fastq.gz is default |
+| #ReferenceInfo  |  | |
+| ReferenceFasta | /Users/johanreimegard/Vetenskap/Data/Wierup/references/fasta.fa | Reference sequence file |
+| ReferenceGTF | /Users/johanreimegard/Vetenskap/Data/Wierup/references/annotation.gtf  | |
+| snakemakeDir | /Users/johanreimegard/git/GBPanalysis/SnakeMakeFiles | Location where all the local snake make files are located |
+| RscriptsDir | /Users/johanreimegard/git/GBPanalysis/R | Location where all the Rscript files are located |
+| #Program specific info  |  | |
+| #CUTADAPT  |  | |
+| #adapterFile | notYetAdded | Fasta file with adapter sequences |
+| #cutAdaptFlags | notYetAdded | Cutadapt specific parameters |
+| #STAR  |  | |
+| #IF not star reference is added a new one will be generated  |  | |
+| STARreference | /full/path/to/reference/STARdir | Should be the star reference build from the fasta and gtf reference above |
+| STARmappingFlags |  | STAR specific parameters |
+| STABuildFlags |  | STAR specific parameters |
+| #SAMTOOLS  |  | |
+| samtoolsViewFlags | -h -bS | STAR specific parameters |
+| #HTSeq  |  | |
+| HTSeqFlags | -t miRNA -i Name -a 0 -f bam -r pos -s yes | STAR specific parameters |
+| #UPPMAXspecific  |  | |
+| projNr | test | Give the correct project number for where the hours should be taken |
+| time | 1-00:00:00 | Time allocated for the run Default is one day |
+| email | john.doe@somewhere.com | The email addres to send if there are any problems with the runs |

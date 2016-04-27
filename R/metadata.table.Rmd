@@ -1,0 +1,11 @@
+---
+title: "Meta data table"
+author: "Johan"
+date: "20 Jan 2016"
+output: html_document
+---
+|forward|reverse|SampleName |Prep_date|Seq_Date|Seq_type|Tissue|Timepoint|Sex|Weight|Mutation|Mother|Father|
+|--|--|--|--|--|--|--|--|--|--|--|--|--|--|
+|/path/to/forwardFile1 |/path/to/reverseFile1|SampleName1     |3|1|Ilumina|Blood|1|Male|89.0|Yes|1|2|
+|/path/to/forwardFile2 |/path/to/reverseFile2|SampleName3     |2|2|Ilumina|Liver|2|Female|62.3|Yes|1|2|
+|/path/to/forwardFile3 |/path/to/reverseFile3|SampleName3     |1|3|Ilumina|Muscle|2|Male|106.5|No|1|1|

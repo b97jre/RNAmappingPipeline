@@ -1,0 +1,92 @@
+---
+title: "Parameter Info"
+author: "Johan"
+date: "20 Jan 2016"
+output: 
+  html_document:
+    toc: true
+    theme: united
+---
+# Files that needs to be properly filled in for the program to run
+
+## Parameter table. 
+
+This will be generated in the first step. You can copy the table given below and paste them into excel and fill in all the information there. Most of the parameters are fine and you do not need to change them. 
+
+The ones you need to change are 
+
+   * `readsDir` 
+     + Change it to a path where all your reads are
+   * `suffix` 
+     + Default is `fastq.gz` 
+   * `type`
+     + Should be either PE if the reads are paired end or SE if the reads are single end
+   * `sep`
+     + If the `type` is PE then it should be the end of the reads. Common ones are:
+        + `1.fastq.gz 2.fast.gz` 
+        + `_R1_001.fastq.gz _R2_001.fastq.gz`
+     + If the `type` is SE it can be removed
+   * `ReferenceFasta`
+     + The absolute path to the fasta reference file
+   * `ReferenceGTF`
+     + The absolute path to the gtf annotation file
+
+An example of a table is given below. It is also possible to copy the table below into excel, make the changes there and save it as a tab delimeted file called `parameters.table.txt`. Make sure that you afterwards convert the format of the file to unix format
+
+### Example of parameter table
+
+```{r child = 'parameter.table.Rmd'}
+```
+
+### Filing out the parameter table using excel
+
+Even though I recomend filling out the parameter table using `vim` or `emacs` in the terminal it is  possible to do it in excel. This is how you do that:
+
+   1. Download the parameters table from [here]()
+   2. Open it in Excel and fill in the sheet.
+   3. Save it as a tab delimeted file and the filename `parameters.table.txt`
+   4. Upload it to the computer and directory where you will run the pipeline 
+   5. Make sure you change the line ends so that they are in unix format
+
+
+
+
+## Meta data table
+
+This table contains all samples with their corresponding reads. It also contains all the meta data for all the samples that will be used later to analyse the data. Try to add as much meta data as possible to identify reasons for differences in the data. Before running the pipelie do the following steps in the meta data table.
+
+   1. Make sure that the table contains all the samples that you want to use. If not there is something wrong in your parameter file. Most likely something that has to do with reads info.
+   2. Change the names in the 3rd column with the column name 'sampleName' so that the sample name makes sense and are not to long. 
+   3. Add as many columns with meta data for the samples as you like. Do not change the first two (if single end reads) or three (if paired end reads) columns. They should always contain information where the reads are located and the name of the samples. Remember to use strings if the differences independent(like sex or tissue), integers if they are discrete lineary dependent (like dates or timepoints) and numeric if non-discrete (like weight or temperatures). Potential columns if they are different between samples are:
+      + Sequencing dates 
+      + Sampling dates
+      + Chemistry batches
+      + Sex
+      + Mother
+      + Father
+      + Tissue
+      + Weight
+      + Mutation
+      + Temperature
+      + Illnes
+      + Other setup specific
+      
+
+
+### Example of metadata table
+
+```{r child = 'metadata.table.Rmd'}
+```
+
+
+### Filing out the metadata table using excel
+It is also possible to copy the table below into excel, make the changes there and save it as a tab delimeted file called `metadata.table.txt`. Make sure that you afterwards convert the format of the file to unix format.
+This is how you do that:
+
+   1. Download the `metadata.table.txt` from the working directory. 
+   2. Open it in Excel.
+   3. Follow step above for how to fill in the table. 
+   6. Save it as a tab delimeted file and the filename `metadata.table.txt`.
+   7. Upload it to the computer and directory where you will run the pipeline. 
+   8. Make sure you change the line ends so that they are in unix format.
+

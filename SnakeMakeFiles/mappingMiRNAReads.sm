@@ -69,6 +69,7 @@ rule map_reads:
         'zcat {input.read} | bowtie '+BOWTIE_MAPPING_FLAGS+' -p {threads} -S '+MAIN_DIR +'reference/BowtieReference/contigs - > {output.samFile} 2> {output.logFile}'
 
 
+        
 rule samtools_sam2bam:
      input:
     	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
@@ -118,8 +119,9 @@ rule merge_reads_counts_per_gene_into_one_file:
 	output:
 		countTable = MAIN_DIR + 'results/Counts.featureCount.tab.txt',
 		logFile = MAIN_DIR + 'results/Counts.featureCount.log'
+	threads: 8
 	shell:
-		'featureCounts '+ FEATURE_COUNT_FLAGS +' -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.log'
+		'featureCounts '+ FEATURE_COUNT_FLAGS +' '-T {threads}  -a {input.gff} -o {output} '+ MAIN_DIR + 'mapping/bamFiles/*.bam > '+MAIN_DIR + 'results/Counts.featureCount.log'
 
 
 		
