@@ -1,0 +1,66 @@
+include:'pipeline.conf'
+
+# The ultimate output files we want to get
+rule all:
+     input: 
+         expand(MAIN_DIR + 'results/biotype_size/{sample}.pdf', sample=SAMPLE)
+
+
+# remove adapterSequence from files. 
+rule trim_reads:
+    input: 
+    	   fastq = MAIN_DIR + 'reads/{sample}.fastq.gz'
+    output: 
+    	    fastq = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
+    threads: 1
+    shell: 
+    	   'cutadapt '+CUT_ADAPT_FLAGS +' -a '+CUT_ADAPT_ADAPTER+' -o {output.fastq} {input.fastq}'
+
+
+#Create  Bowtie Reference
+rule create_Bowtie_reference:
+  input:
+	  fasta = MAIN_DIR + 'reference/Biotypes/{biotype}.fa'
+  output:
+	  SAindex = MAIN_DIR + 'reference/Biotypes/{biotype}.1.ebwt',
+	  logFile = MAIN_DIR + 'reference/Biotypes/{biotype}.logFile.txt'
+  threads : 1
+  shell:
+	  'bowtie-build '+ BOWTIE_BUILD_FLAGS +'  {input.fasta} '+MAIN_DIR +'reference/Biotypes/{wildcards.biotype} > {output.logFile}' 
+
+
+    	   
+rule unzipFastq:
+	input:
+		fastq = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
+	output:
+		fastq = MAIN_DIR + 'tmp/{sample}.fastq'
+	shell:
+		'zcat {input.fastq} > {output.fastq}'
+		
+		
+rule mapToBioType:
+	input:
+		fastq = MAIN_DIR + 'tmp/{sample}.fastq', 
+		bowtieReferencfile =  expand(MAIN_DIR + 'reference/Biotypes/{biotype}.1.ebwt', biotype = BIOTYPES)
+	
+	output:
+		fastq = MAIN_DIR + 'tmp/{sample}.unmapped.fastq',
+		lengthDistribution =  expand(MAIN_DIR + 'tmp/{sample}/{biotype}_lengths.txt', biotype = BIOTYPES)
+
+	run:
+		for BIOTYPE in input.bowtieReferencfile:
+			shell( 'bowtie -M 1 -n 0 -l 17 -S --best --un {output.fastq} '+ MAIN_DIR + 'reference/BowtieReference/{BIOTYPE}/contigs {input.fastq} | samtools view -S -F 0x14 -| cut -f 10 | awk "{print length($0) }" | sort | uniq -c > '+ MAIN_DIR + 'tmp/{wildcards.sample}/{biotype}_lengths.txt')
+			shell('mv {output.fastq} {input.fastq}')
+
+			
+rule gatherLengthData:
+	input:
+		lengthDistribution =  expand(MAIN_DIR + 'tmp/{sample}/{biotype}_lengths.txt', biotype = BIOTYPES)
+	output:
+		pdf = MAIN_DIR + 'results/biotype_size/{sample}.pdf',
+		textFile = MAIN_DIR + 'results/biotype_size/{sample}.tab.txt'
+	shell:
+		'Rscript '+ R_SCRIPT_DIR + 'plot_rna_lib_summary.R  '+TMP_DIR+' {wildcards.sample} {output.pdf} {output.textFile} '
+		    		
+	
