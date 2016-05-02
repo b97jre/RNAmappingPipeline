@@ -46,7 +46,7 @@ rule mapToBioType:
 	
 	output:
 		fastq = MAIN_DIR + 'tmp/{sample}.unmapped.fastq',
-		lengthDistribution =  expand(MAIN_DIR + 'tmp/{wildcards.sample}/{biotype}_lengths.txt', biotype = BIOTYPES)
+		lengthDistribution =  expand(MAIN_DIR + 'tmp/{sample}/{biotype}_lengths.txt',sample  =SAMPLE,  biotype = BIOTYPES)
 
 	run:
 		for BIOTYPE in input.bowtieReferencfile:
