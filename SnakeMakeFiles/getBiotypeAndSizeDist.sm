@@ -61,6 +61,6 @@ rule gatherLengthData:
 		pdf = MAIN_DIR + 'results/biotype_size/{sample}.pdf',
 		textFile = MAIN_DIR + 'results/biotype_size/{sample}.tab.txt'
 	shell:
-		'Rscript '+ R_SCRIPT_DIR + 'plot_rna_lib_summary.R  '+TMP_DIR+' {wildcards.sample} {output.pdf} {output.textFile} '
+		'Rscript '+ R_SCRIPT_DIR + 'plot_rna_lib_summary.R  '+TMP_DIR+' {sample} {output.pdf} {output.textFile} '
 		    		
 	
