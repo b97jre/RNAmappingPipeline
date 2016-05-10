@@ -42,15 +42,15 @@ rule unzipFastq:
 rule mapToBioType:
 	input:
 		fastq = MAIN_DIR + 'tmp/{sample}.fastq', 
-		bowtieReferencfile =  expand(MAIN_DIR + 'reference/Biotypes/{biotype}.1.ebwt', biotype = BIOTYPES)
+		bowtieReferencfile =  MAIN_DIR + 'reference/Biotypes/{biotype}.1.ebwt'
 	
 	output:
 		fastq = MAIN_DIR + 'tmp/{sample}.unmapped.fastq',
-		lengthDistribution =  expand(MAIN_DIR + 'tmp/{sample}/{biotype}_lengths.txt',sample  =SAMPLE,  biotype = BIOTYPES)
+		lengthDistribution =  MAIN_DIR + 'tmp/{sample}/{biotype}_lengths.txt'
 
 	run:
-		for BIOTYPE in input.bowtieReferencfile:
-			shell( 'bowtie -M 1 -n 0 -l 17 -S --best --un {output.fastq} '+ MAIN_DIR + 'reference/BowtieReference/{BIOTYPE}/contigs {input.fastq} | samtools view -S -F 0x14 -| cut -f 10 | awk "{print length($0) }" | sort | uniq -c > '+ MAIN_DIR + 'tmp/{wildcards.sample}/{biotype}_lengths.txt')
+		for BIOTYPE in BIOTYPES:
+			shell( 'bowtie -M 1 -n 0 -l 17 -S --best --un {output.fastq} '+ MAIN_DIR + 'reference/Biotypes/{BIOTYPE}/contigs {input.fastq} | samtools view -S -F 0x14 -| cut -f 10 | awk "{print length($0) }" | sort | uniq -c > '+ MAIN_DIR + 'tmp/{sample}/{BIOTYPE}_lengths.txt')
 			shell('mv {output.fastq} {input.fastq}')
 
 			
