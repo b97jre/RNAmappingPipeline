@@ -34,25 +34,26 @@ rule unzipFastq:
 	input:
 		fastq = MAIN_DIR + 'reads/{sample}.trimmed.fastq.gz'
 	output:
-		fastq = MAIN_DIR + 'tmp/{sample}.fastq'
+		fastq = MAIN_DIR + 'tmp/{sample}/{sample}.fastq'
 	shell:
 		'zcat {input.fastq} > {output.fastq}'
 		
 		
 rule mapToBioType:
 	input:
-		fastq = MAIN_DIR + 'tmp/{sample}.fastq', 
+		fastq = MAIN_DIR + 'tmp/{sample}/{sample}.fastq', 
 		bowtieReferencfiles = expand( MAIN_DIR + 'reference/BowtieReference/biotypes/{biotype}.1.ebwt', biotype = BIOTYPES) 
 	output:
-		fastq = MAIN_DIR + 'tmp/{sample}.out.fastq', 
+		fastq = MAIN_DIR + 'tmp/{sample}/{sample}.out.fastq', 
 		pdf = MAIN_DIR + 'results/biotype_size/{sample}.pdf',
 		textFile = MAIN_DIR + 'results/biotype_size/{sample}.tab.txt'
 	params:
 		biotypes=BIOTYPES
 	run:
 		for biotype in params.biotypes:
+			shell('mkdir MAIN_DIR + 'tmp/{wildcards.sample}')
 			shell( 'bowtie -M 1 -n 0 -l 17 -S --best --un {output.fastq} '+ MAIN_DIR + 'reference/BowtieReference/biotypes/{biotype} {input.fastq} | samtools view -S -F 0x14 -| cut -f 10 | awk "{{print length($1) }}" | sort | uniq -c > '+ MAIN_DIR + 'tmp/{wildcards.sample}/{biotype}_lengths.txt')
 			shell('mv {output.fastq} {input.fastq}')
-		shell('Rscript '+ R_SCRIPT_DIR + 'plot_rna_lib_summary.R  '+TMP_DIR+' {sample} {output.pdf} {output.textFile}')
+		shell('Rscript '+ R_SCRIPT_DIR + 'plot_rna_lib_summary.R  '+MAIN_DIR + 'tmp/{sample} {sample} {output.pdf} {output.textFile}')
 		    		
 	
