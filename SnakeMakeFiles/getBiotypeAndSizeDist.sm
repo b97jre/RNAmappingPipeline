@@ -53,6 +53,6 @@ rule mapToBioType:
 		for biotype in params.biotypes:
 			shell( 'bowtie -M 1 -n 0 -l 17 -S --best --un {output.fastq} '+ MAIN_DIR + 'reference/BowtieReference/biotypes/{biotype} {input.fastq} | samtools view -S -F 0x14 -| cut -f 10 | awk "{{print length($1) }}" | sort | uniq -c > '+ MAIN_DIR + 'tmp/{wildcards.sample}/{biotype}_lengths.txt')
 			shell('mv {output.fastq} {input.fastq}')
-		shell('Rscript '+ MAIN_DIR + 'scripts/RNAmappingPipeline/Rscripts/plot_rna_lib_summary.R  '+MAIN_DIR + 'tmp/{sample} {sample} {output.pdf} {output.textFile}')
+		shell('Rscript '+ MAIN_DIR + 'scripts/RNAmappingPipeline/Rscripts/plot_rna_lib_summary.R  '+MAIN_DIR + 'tmp/{wildcards.sample} {wildcards.sample} {output.pdf} {output.textFile}')
 		    		
 	
