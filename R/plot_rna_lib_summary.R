@@ -10,11 +10,6 @@ plot.header <- args[2]
 out.plot.file <- args[3]
 out.tab.file <- args[4]
 
-input.dir = "/Users/johanreimegard/Vetenskap/Data/jakobsson/nobackup/RIP/tmp"
-plot.header <- "test"
-out.plot.file <- "/Users/johanreimegard/Vetenskap/Data/jakobsson/nobackup/RIP/tmp/tmp.pdf"
-out.tab.file <-"/Users/johanreimegard/Vetenskap/Data/jakobsson/nobackup/RIP/tmp/tmp.txt"
-
 ## Hard coded values
 suffix <- "_lengths.txt"
 files =  list.files(path = input.dir, full.names = FALSE)
