@@ -2,7 +2,7 @@ include:"pipeline.conf"
 
 
 rule all:
-  input: MAIN_DIR + "multiqc_report.zip", MAIN_DIR +"RSeQC_report.pdf"
+  input: MAIN_DIR + "results/multiqc_report.zip", MAIN_DIR +"results/RSeQC_report.pdf"
 
 
   
@@ -92,6 +92,11 @@ rule gatherQCdtaSE:
 rule gatherRSEQCdta:
   input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
   output: MAIN_DIR +"RSeQC_report.pdf"
-  shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R "+ MAIN_DIR +"RSeQC"
-
+  shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R --dir "+ MAIN_DIR 
+  
+ rule move2results:
+	  input: MAIN_DIR +'{file}'
+	  output: MAIN_DIR +"results/{file}"
+	  shell: 'mv {input} {output} 
+	  
 
