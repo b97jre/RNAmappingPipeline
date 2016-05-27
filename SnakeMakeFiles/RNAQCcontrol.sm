@@ -97,6 +97,6 @@ rule gatherRSEQCdta:
 rule move2results:
   input: MAIN_DIR +'{file}'
   output: MAIN_DIR +"results/{file}"
-  shell: 'mv {input} {output} 
+  shell: 'mv {input} {output}'
 	  
 
