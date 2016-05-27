@@ -94,9 +94,9 @@ rule gatherRSEQCdta:
   output: MAIN_DIR +"RSeQC_report.pdf"
   shell: "Rscript "+ SCRIPT_DIR +"R/getRSEQC_report.R --dir "+ MAIN_DIR 
   
- rule move2results:
-	  input: MAIN_DIR +'{file}'
-	  output: MAIN_DIR +"results/{file}"
-	  shell: 'mv {input} {output} 
+rule move2results:
+  input: MAIN_DIR +'{file}'
+  output: MAIN_DIR +"results/{file}"
+  shell: 'mv {input} {output} 
 	  
 
