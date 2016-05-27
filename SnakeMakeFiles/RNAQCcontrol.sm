@@ -90,10 +90,16 @@ rule gatherQCdtaSE:
   shell: 'multiqc ' + MAIN_DIR
   
 rule gatherRSEQCdta:
-  input:  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.tin.summary.txt", sample=SAMPLE), geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
+  input:  
+	  TIN_info =  expand(MAIN_DIR + "RSeQC/{sample}.tin.summary.txt", sample=SAMPLE), 
+	  geneBodyCoverage_info =  expand(MAIN_DIR + "RSeQC/{sample}.geneBodyCoverage.r", sample=SAMPLE),
+	  junctionSaturation_info =  expand(MAIN_DIR + "RSeQC/{sample}.junctionSaturation_plot.r", sample=SAMPLE),
+	  inner_distance_freq_info = expand(MAIN_DIR + "RSeQC/{sample}.inner_distance_freq.txt", sample=SAMPLE),
+	  clipping_profile_info = expand(MAIN_DIR + "RSeQC/{sample}.clipping_profile.r", sample=SAMPLE),
+	  read_distribution_info = expand(MAIN_DIR + "RSeQC/{sample}.read_distribution.txt", sample=SAMPLE)
   output: 
-	  html: MAIN_DIR +"RSeQCdocument.html"
-	  pdf: MAIN_DIR +"RSeQCdocument.pdf"
+	  html = MAIN_DIR +"RSeQCdocument.html",
+	  pdf = MAIN_DIR +"RSeQCdocument.pdf"
   
   shell: "Rscript "+ SCRIPT_DIR +"Rscripts/getRSEQC_report.R --dir "+ MAIN_DIR 
   
