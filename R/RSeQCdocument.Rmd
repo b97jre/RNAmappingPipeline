@@ -1,8 +1,10 @@
 ---
 title: "Sample QC analysis"
 author: "Johan"
-date: "19 Feb 2016"
-output: html_document
+output:
+  html_document
+  pdf_document
+  
 params:
   RfunctionsDirectory: "/glob/johanr/scripts/RNAmappingPipeline/R"
   workingDirectory: "."
