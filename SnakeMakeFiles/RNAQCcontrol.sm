@@ -30,7 +30,7 @@ rule run_fastQC_SE:
 rule GTF2GenePred:
   input: MAIN_DIR + 'reference/annotation/contigs.gtf'
   output: MAIN_DIR + 'reference/annotation/contigs.genePred'
-  shell: 'gtfToGenePred {input}  {output}'
+  shell: 'gtfToGenePred -ignoreGroupsWithoutExons {input}  {output}'
 
 # Convert GenePred to Bed12
 rule GTF2BED12:
