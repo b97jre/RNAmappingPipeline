@@ -1,3 +1,6 @@
+#install.packages("GGally")
+#source("http://bioconductor.org/biocLite.R")
+#biocLite("biomaRt")
 
 
 library(DESeq2,quietly = TRUE,warn.conflicts = FALSE,)
@@ -7,7 +10,23 @@ library("RColorBrewer",quietly = TRUE,warn.conflicts = FALSE)
 library(ggplot2,quietly = TRUE,warn.conflicts = FALSE)
 library(gridExtra,quietly = TRUE,warn.conflicts = FALSE)
 library(GGally,quietly = TRUE,warn.conflicts = FALSE)
+library(reshape2)
+library(biomaRt)
+library(knitr)
 
+
+
+getEsnemblGeneName <-  function (host="www.ensembl.org", dataset="rnorvegicus_gene_ensembl", 
+                                 attributes= c("ensembl_gene_id", "external_gene_name"), 
+                                 filters = "ensembl_gene_id", values){
+  ensembl  <- useMart(host=host, "ENSEMBL_MART_ENSEMBL",  dataset=dataset)
+  genemap <- getBM(attributes = attributes,
+                   filters = filters,
+                   values = values,
+                   mart = ensembl )
+  return (genemap)
+  
+}
 
 
 gg_color_hue <- function(n) {
@@ -19,6 +38,69 @@ gg_shapeValues  <- function(n){
   shapes = c(16,17,15,3,7,8)
   subshapes = rep(shapes,len = n)
 }
+
+fixFeatureCountTable <- function(exp.data, 
+                                 rowID = 'Geneid',
+                                 prefix = '.*bamFiles.',
+                                 suffix ='.bam'){
+  # fix rows
+  row.names(exp.data) <- exp.data[[rowID]]
+  
+  # fix columns 
+  expDataColNames = colnames(exp.data)
+  noPrefix = gsub(prefix,"",expDataColNames)
+  colnames(exp.data) <- gsub(suffix, "", noPrefix)
+  
+  # remove non-counts columns 
+  exp.data <- exp.data[,c(7:dim(exp.data)[2])]
+  
+  return(exp.data)
+}
+
+
+plotFeatureCountSummary <- function(filename, percent = FALSE){
+  exp.data.summary <- read.table(filename, header=TRUE, sep="\t",comment.char="#")
+  expDataSummaryColNames = colnames(exp.data.summary)
+  noPrefix = gsub(".*bamFiles.","",expDataSummaryColNames)
+  
+  colnames(exp.data.summary) <- gsub(".bam", "", noPrefix)
+  rownames(exp.data.summary) <- exp.data.summary[,1]
+  exp.data.summary = exp.data.summary[c("Assigned","Unassigned_Ambiguity","Unassigned_NoFeatures"),]
+  if(!percent){
+    mappingData = melt(exp.data.summary)
+    ggplot(mappingData, aes(x = variable, y = value,fill=Status)) + 
+      geom_bar(stat = "identity") + 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+  }else{
+    
+    exp.data.summary.percent = exp.data.summary[2:ncol(exp.data.summary)]
+    exp.data.summary.percent = t(t(exp.data.summary.percent) / colSums(exp.data.summary.percent)) *100
+    rownames(exp.data.summary.percent) <- c("Assigned","Unassigned_Ambiguity","Unassigned_NoFeatures")
+    mappingData = melt(exp.data.summary.percent)
+    colnames(mappingData) <- c("Status","variable","Percent")
+    ggplot(mappingData, aes(x = variable, y = Percent,fill=Status)) + 
+      geom_bar(stat = "identity") + 
+      theme(axis.text.x = element_text(angle = 90, hjust = 1)) 
+  }
+}
+
+getFeatureCountSummary <- function(filename, percent = FALSE){
+  exp.data.summary <- read.table(filename, header=TRUE, sep="\t",comment.char="#")
+  expDataSummaryColNames = colnames(exp.data.summary)
+  noPrefix = gsub(".*bamFiles.","",expDataSummaryColNames)
+  
+  colnames(exp.data.summary) <- gsub(".bam", "", noPrefix)
+  rownames(exp.data.summary) <- exp.data.summary[,1]
+  exp.data.summary = exp.data.summary[,2:ncol(exp.data.summary)]
+  
+  exp.data.summary = exp.data.summary[c("Assigned","Unassigned_Ambiguity","Unassigned_NoFeatures"),]
+  exp.data.summary.percent = exp.data.summary
+  exp.data.summary.percent = t(t(exp.data.summary.percent) / colSums(exp.data.summary.percent)) *100
+  rownames(exp.data.summary.percent) <- c("Percent_Assigned","Percent_Unassigned_Ambiguity","Percent_Unassigned_NoFeatures")
+  final.summary = rbind(exp.data.summary, exp.data.summary.percent)
+  return (final.summary)
+}
+
 
 
 plotSample2SampleDistance<- function(normData ){
@@ -44,6 +126,14 @@ plotMatrixHeatMap<- function(sampleDistMatrix, sampleDists){
            col=colors)
 }
 
+plotMatrixHeatMap2<- function(sampleDistMatrix, sampleDists){
+  colors <- colorRampPalette( rev(brewer.pal(9, "Blues")) )(255)
+  colnames(sampleDistMatrix) = NULL
+  pheatmap(sampleDistMatrix,
+           clustering_distance_rows=sampleDists,
+           clustering_distance_cols=sampleDists,
+           col=colors)
+}
 
 
 
@@ -66,20 +156,20 @@ getPCdata <- function(values, metaDataTable, n.comp = 5,scale = FALSE, center = 
   metaInfo = metaInfo[order(rownames(metaInfo)),]
   
   PCAinfo = cbind(as.data.frame(pca.basis[, plot.comp]),metaInfo )
-
+  
   allInfo = list(PCAinfo = PCAinfo, variance = e.var, pcrCompResult = prcompResult)  
   return (allInfo)  
 }
 
 
 # Create PCAplot requires that the colnames in the expressionTable are present in the metaDataTable[sampleColName, ]
-plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
-                         sampleColName = "Name", colorComponent = NULL , pchComponent = NULL){
+plotPCAplotExtended <- function( PCAinfo,varianceInfo,n.comp,
+                                 sampleColName = "Name", colorComponent = NULL , pchComponent = NULL){
   
   ggInfo = PCAinfo[,1:n.comp]
   ggInfo[colorComponent] = PCAinfo[colorComponent]
-  ggInfo['colorComponent'] = PCAinfo[colorComponent]
   ggInfo[pchComponent] = PCAinfo[pchComponent]
+  ggInfo['colorComponent'] = PCAinfo[colorComponent]
   ggInfo['pchComponent'] = PCAinfo[pchComponent]
   ggInfo['pchComponent'] = PCAinfo[pchComponent]
   ggInfo[paste(pchComponent, colorComponent, sep = "_")] =as.factor(paste(ggInfo[[pchComponent]], ggInfo[[colorComponent]], sep = "_"))
@@ -107,9 +197,8 @@ plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
   
   
   pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp+2)) ,
-                     params = c(adjust = 0.5,binwidth = 0.1),
                      axisLabels="internal",
-                     colour=colorComponent,  shape = pchComponent, linetype = pchComponent,
+                     mapping = aes(color=colorComponent,  shape = pchComponent, linetype = pchComponent),
                      upper = list(continuous = "blank", combo = 'box', discrete = "blank"),
                      lower = list(continuous = "points", combo = "blank", discrete = "blank"),
                      diag  = list(continuous = "density", discrete = "blank")
@@ -177,6 +266,31 @@ plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
   #m + geom_density(fill=NA,adjust=1/3)
   
 }
+
+plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
+                         sampleColName = "Name", colorComponent = NULL , pchComponent = NULL){
+  
+  ggInfo = PCAinfo[,1:n.comp]
+  ggInfo[colorComponent] = PCAinfo[colorComponent]
+  ggInfo[pchComponent] = PCAinfo[pchComponent]
+  ggInfo['colorComponent'] = PCAinfo[colorComponent]
+  ggInfo['pchComponent'] = PCAinfo[pchComponent]
+  ggInfo['pchComponent'] = PCAinfo[pchComponent]
+  ggInfo[paste(pchComponent, colorComponent, sep = "_")] =as.factor(paste(ggInfo[[pchComponent]], ggInfo[[colorComponent]], sep = "_"))
+  
+  pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp)) ,
+                     axisLabels="internal",
+                     mapping = aes(color=colorComponent,  shape = pchComponent, linetype = pchComponent),
+                     upper = list(continuous = "blank", combo = 'box', discrete = "blank"),
+                     lower = list(continuous = "points", combo = "blank", discrete = "blank"),
+                     diag  = list(continuous = "density", discrete = "blank")
+  )
+  return(pcaPlot)
+}
+
+
+
+
 
 # Create PCAplot requires that the colnames in the expressionTable are present in the metaDataTable[sampleColName, ]
 
