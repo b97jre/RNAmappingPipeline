@@ -271,19 +271,31 @@ plotPCAplot <- function( PCAinfo,varianceInfo,n.comp,
                          sampleColName = "Name", colorComponent = NULL , pchComponent = NULL){
   
   ggInfo = PCAinfo[,1:n.comp]
-  ggInfo[colorComponent] = PCAinfo[colorComponent]
-  ggInfo[pchComponent] = PCAinfo[pchComponent]
-  ggInfo['colorComponent'] = PCAinfo[colorComponent]
-  ggInfo['pchComponent'] = PCAinfo[pchComponent]
-  ggInfo['pchComponent'] = PCAinfo[pchComponent]
-  ggInfo[paste(pchComponent, colorComponent, sep = "_")] =as.factor(paste(ggInfo[[pchComponent]], ggInfo[[colorComponent]], sep = "_"))
-  
-  pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp)) ,
+  extra = 0
+  if(!is.null(colorComponent)){  
+    ggInfo[colorComponent] = PCAinfo[colorComponent]
+    extra = extra + 1
+  }
+  if(!is.null(pchComponent)){  
+    ggInfo[pchComponent] = PCAinfo[pchComponent]
+    extra = extra + 1
+  }
+  if(!is.null(colorComponent)){  
+    ggInfo['colorComponent'] = PCAinfo[colorComponent]
+  }
+  if(!is.null(pchComponent)){  
+    ggInfo['pchComponent'] = PCAinfo[pchComponent]
+  }
+  if(extra == 2){
+    ggInfo[paste(pchComponent, colorComponent, sep = "_")] =as.factor(paste(ggInfo[[pchComponent]], ggInfo[[colorComponent]], sep = "_"))
+  }
+  print(ggInfo)
+  pcaPlot <- ggpairs(ggInfo,columns = c(1:(n.comp+extra)) ,
                      axisLabels="internal",
                      mapping = aes(color=colorComponent,  shape = pchComponent, linetype = pchComponent),
                      upper = list(continuous = "blank", combo = 'box', discrete = "blank"),
                      lower = list(continuous = "points", combo = "blank", discrete = "blank"),
-                     diag  = list(continuous = "density", discrete = "blank")
+                     diag  = list(continuous = "blan", discrete = "blank")
   )
   return(pcaPlot)
 }

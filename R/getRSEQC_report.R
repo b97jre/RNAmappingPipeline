@@ -2,6 +2,8 @@
 library('rmarkdown')
 library("optparse")
 
+#minor comment
+
 option_list = list(
   make_option(c("-d", "--dir"), type="character", default=NULL, 
               help="Working directory that contains all parameter file", metavar="character"),
