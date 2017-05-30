@@ -1,0 +1,94 @@
+include:'pipeline.conf'
+
+
+# The ultimate output files we want to get
+rule all:
+     input:
+#         MAIN_DIR +"results/multiQC_report.zip",
+    	   expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai', sample=SAMPLE)
+#         MAIN_DIR + 'results/Counts.featureCount.tab.txt',
+#         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
+
+
+
+
+# Run FASTQC on samples;
+#rule run_fastQC:
+#    input: MAIN_DIR + 'reads/{sample}.fastq.gz'
+#    output: MAIN_DIR +"reads/{sample}_fastqc.html"
+#    shell: "fastqc {input}"
+
+
+# Gather all the QC results using multiQC
+#rule run_multiQC:
+#  input:
+#	  original =  expand(MAIN_DIR +"reads/{sample}_fastqc.html", sample = SAMPLE),
+#	  trimmed =  expand(MAIN_DIR +"reads/{sample}.trimmed_fastqc.html", sample = SAMPLE),
+#	  untrimmed =  expand(MAIN_DIR +"reads/{sample}.untrimmed_fastqc.html", sample = SAMPLE)
+#  output: MAIN_DIR + "results/multiQC_report.zip"
+#  shell: 'multiqc -o  ' + MAIN_DIR + 'results/multiQC_report ' + MAIN_DIR +"/reads"
+
+
+
+#Create  BWA Reference
+rule create_BWA_reference:
+  input:
+	  fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
+  output:
+	  SAindex = MAIN_DIR + 'reference/BWAReference/contigs.fa.sa'
+  threads : 1
+  shell:
+	  'BWA index '+ BWA_BUILD_FLAGS +' {input.fasta}'
+
+
+
+# Map
+rule map_reads:
+     input:
+      forward = MAIN_DIR + "reads/{sample}.1.fastq.gz",
+      reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz",
+      reference = MAIN_DIR + 'reference/BWAReference/contigs.fa.sa'
+     output:
+    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
+    	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bwq.logFile'
+     threads: 8
+     shell:
+        'bwa mem '+BWA_MAPPING_FLAGS+' -t {threads} {reference} {forward} {reverse} >{samFile} 2>{logFile}'
+
+
+
+rule samtools_sam2bam:
+     input:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
+     output:
+    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
+     shell:
+    	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
+
+
+# Sort the BAM files
+rule samtools_sort:
+     input:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.temp'
+     output:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+     shell:
+    	 'samtools sort {input} {MAIN_DIR}/mapping/bamFiles/{wildcards.sample}'
+
+
+
+
+# Index the sorted BAM files
+
+rule samtools_index_hairpin:
+     input:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+     output:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai'
+     shell:
+    	 'samtools index {input}'
+
+
+
+
+
