@@ -35,10 +35,10 @@ rule create_BWA_reference:
   input:
 	  fasta = MAIN_DIR + 'reference/fasta/contigs.fa'
   output:
-	  SAindex = MAIN_DIR + 'reference/BWAReference/contigs.fa.sa'
+	  SAindex = MAIN_DIR + 'reference/fasta/contigs.fa.sa'
   threads : 1
   shell:
-	  'BWA index '+ BWA_BUILD_FLAGS +' {input.fasta}'
+	  'bwa index '+ BWA_BUILD_FLAGS +' {input.fasta}'
 
 
 
@@ -46,24 +46,26 @@ rule create_BWA_reference:
 rule map_reads:
      input:
       forward = MAIN_DIR + "reads/{sample}.1.fastq.gz",
-      reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz",
-      reference = MAIN_DIR + 'reference/BWAReference/contigs.fa.sa'
+      reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", 
+      SAreference = MAIN_DIR + 'reference/fasta/contigs.fa.sa',
+      reference = MAIN_DIR + 'reference/fasta/contigs.fa'
+ 
      output:
-    	 samFile =temp( MAIN_DIR + 'mapping/bamFiles/{sample}.sam')
-    	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bwq.logFile'
+    	 bamFile = temp( MAIN_DIR + 'mapping/bamFiles/{sample}.temp'),
+    	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bwa.logFile'
      threads: 8
      shell:
-        'bwa mem '+BWA_MAPPING_FLAGS+' -t {threads} {reference} {forward} {reverse} >{samFile} 2>{logFile}'
+        'bwa mem '+BWA_MAPPING_FLAGS+' -t {threads} {input.reference} {input.forward} {input.reverse}|samtools view -@ {threads} '+ SAMTOOLS_VIEW_FLAGS +' -o {output.bamFile} -  &> {output.logFile}'
 
 
 
-rule samtools_sam2bam:
-     input:
-    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
-     output:
-    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
-     shell:
-    	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
+#rule samtools_sam2bam:
+#     input:
+#    	 MAIN_DIR + 'mapping/bamFiles/{sample}.sam'
+#     output:
+#    	 temp(MAIN_DIR + 'mapping/bamFiles/{sample}.temp')
+#     shell:
+#    	 'samtools view '+ SAMTOOLS_VIEW_FLAGS +'  {input} -o {output}'
 
 
 # Sort the BAM files
