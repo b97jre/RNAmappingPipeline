@@ -5,7 +5,9 @@ include:'pipeline.conf'
 rule all:
      input:
 #         MAIN_DIR +"results/multiQC_report.zip",
-    	   expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai', sample=SAMPLE)
+    	   expand(MAIN_DIR + 'mapping/bamFiles/{sample}.bam.bai', sample=SAMPLE),
+    	   expand(MAIN_DIR + 'mapping/bamFiles/{sample}.flagstat', sample=SAMPLE),
+    	   expand(MAIN_DIR + 'mapping/bamFiles/{sample}.idxstats', sample=SAMPLE)
 #         MAIN_DIR + 'results/Counts.featureCount.tab.txt',
 #         expand(MAIN_DIR + 'mapping/biotype_size/{sample}.pdf', sample=SAMPLE)
 
@@ -46,10 +48,10 @@ rule create_BWA_reference:
 rule map_reads:
      input:
       forward = MAIN_DIR + "reads/{sample}.1.fastq.gz",
-      reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz", 
+      reverse = MAIN_DIR + "reads/{sample}.2.fastq.gz",
       SAreference = MAIN_DIR + 'reference/fasta/contigs.fa.sa',
       reference = MAIN_DIR + 'reference/fasta/contigs.fa'
- 
+
      output:
     	 bamFile = temp( MAIN_DIR + 'mapping/bamFiles/{sample}.temp'),
     	 logFile = MAIN_DIR + 'mapping/bamFiles/{sample}.bwa.logFile'
@@ -91,6 +93,20 @@ rule samtools_index_hairpin:
     	 'samtools index {input}'
 
 
+# Get raw count from output.
+rule samtools_idx_stats:
+     input:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+     output:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.idxstats'
+     shell:
+    	 'samtools index {input} > {output} '
 
-
+rule samtools_flagstat_stats:
+     input:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.bam'
+     output:
+    	 MAIN_DIR + 'mapping/bamFiles/{sample}.flagstat'
+     shell:
+    	 'samtools index {input} > {output} '
 
